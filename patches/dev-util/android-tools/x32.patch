@@ -1,0 +1,14 @@
+--- a/vendor/boringssl/crypto/fipsmodule/rand/getrandom_fillin.h
++++ b/vendor/boringssl/crypto/fipsmodule/rand/getrandom_fillin.h
+@@ -23,7 +23,11 @@
+ #include <sys/syscall.h>
+
+ #if defined(OPENSSL_X86_64)
++#if defined(__ILP32__)
++#define EXPECTED_NR_getrandom 1073742142 /* X32 syscall bit + 318 = (0x40000000 + 318) */
++#else
+ #define EXPECTED_NR_getrandom 318
++#endif
+ #elif defined(OPENSSL_X86)
+ #define EXPECTED_NR_getrandom 355
+ #elif defined(OPENSSL_AARCH64)

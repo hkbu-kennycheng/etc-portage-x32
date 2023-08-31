@@ -1,0 +1,20 @@
+--- a/tools/gcc.jam
++++ b/tools/gcc.jam
+@@ -216,7 +216,7 @@
+         # right onces. Note that we do not provide a clean way to build a 32-bit
+         # binary using a 64-bit compiler, but user can always pass -m32
+         # manually.
+-        local lib_path = $(root)/bin $(root)/lib $(root)/lib32 $(root)/lib64 ;
++        local lib_path = $(root)/bin $(root)/lib $(root)/lib32 $(root)/lib64 $(root)/libx32 ;
+         if $(.debug-configuration)
+         {
+             ECHO notice: using gcc libraries :: $(condition) :: $(lib_path) ;
+@@ -356,7 +356,7 @@
+ 
+     local generic-os = [ set.difference $(all-os) : aix hpux ] ;
+     local arch = power sparc x86 ;
+-    compile-link-flags <target-os>$(generic-os)/<architecture>$(arch)/<address-model>32 : -m32 ;
++    compile-link-flags <target-os>$(generic-os)/<architecture>$(arch)/<address-model>32 : -mx32 ;
+     compile-link-flags <target-os>$(generic-os)/<architecture>$(arch)/<address-model>64 : -m64 ;
+ }
+ 

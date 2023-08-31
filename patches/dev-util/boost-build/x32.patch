@@ -1,0 +1,32 @@
+--- a/tools/gcc.py
++++ b/tools/gcc.py
+@@ -162,7 +162,8 @@
+         lib_path = [os.path.join(root, 'bin'),
+                     os.path.join(root, 'lib'),
+                     os.path.join(root, 'lib32'),
+-                    os.path.join(root, 'lib64')]
++                    os.path.join(root, 'lib64'),
++                    os.path.join(root, 'libx32')]
+         if debug():
+             print 'notice: using gcc libraries ::', condition, '::', lib_path
+         toolset.flags('gcc.link', 'RUN_PATH', condition, lib_path)
+@@ -735,7 +736,7 @@
+ # Set architecture/instruction-set options.
+ #
+ # x86 and compatible
+-flags('gcc', 'OPTIONS', ['<architecture>x86/<address-model>32'], ['-m32'])
++flags('gcc', 'OPTIONS', ['<architecture>x86/<address-model>32'], ['-mx32'])
+ flags('gcc', 'OPTIONS', ['<architecture>x86/<address-model>64'], ['-m64'])
+ cpu_flags('gcc', 'OPTIONS', 'x86', 'native', ['-march=native'])
+ cpu_flags('gcc', 'OPTIONS', 'x86', 'i486', ['-march=i486'])
+--- a/tools/gcc.jam
++++ b/tools/gcc.jam
+@@ -370,7 +370,7 @@
+ 
+     local generic-os = [ set.difference $(all-os) : aix hpux ] ;
+     local arch = power sparc x86 ;
+-    compile-link-flags <target-os>$(generic-os)/<architecture>$(arch)/<address-model>32 : -m32 ;
++    compile-link-flags <target-os>$(generic-os)/<architecture>$(arch)/<address-model>32 : -mx32 ;
+     compile-link-flags <target-os>$(generic-os)/<architecture>$(arch)/<address-model>64 : -m64 ;
+ }
+ 
