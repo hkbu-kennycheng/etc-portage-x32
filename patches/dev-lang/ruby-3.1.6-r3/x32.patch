@@ -1,0 +1,11 @@
+--- a/configure.ac
++++ b/configure.ac
+@@ -2332,7 +2332,7 @@
+         [x*64-linux*], [
+             AS_CASE(["$ac_cv_sizeof_voidp"],
+                 [8], [ coroutine_type=amd64 ],
+-                [4], [ coroutine_type=x86 ],
++                [4], [ coroutine_type=amd64 ],
+                 dnl unknown pointer size, bail out as no Context.h soon.
+             )
+         ],
