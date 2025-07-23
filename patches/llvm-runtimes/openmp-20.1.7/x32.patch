@@ -9,9 +9,9 @@ index 0918fdd..a29001c 100644
 --- a/openmp/runtime/cmake/LibompMicroTests.cmake
 +++ b/openmp/runtime/cmake/LibompMicroTests.cmake
 @@ -198,6 +198,7 @@ else()
-     elseif(${INTEL64})
        libomp_append(libomp_expected_library_deps libc.so.6)
        libomp_append(libomp_expected_library_deps ld-linux-x86-64.so.2)
+       libomp_append(libomp_expected_library_deps librt.so.1)
 +      libomp_append(libomp_expected_library_deps ld-linux-x32.so.2)
      elseif(${ARM})
        libomp_append(libomp_expected_library_deps libc.so.6)
@@ -157,8 +157,8 @@ index 0d57bf4..5904503 100644
  extern void __kmp_expand_host_name(char *buffer, size_t size);
  extern void __kmp_expand_file_name(char *result, size_t rlen, char *pattern);
  
--#if KMP_ARCH_X86 || KMP_ARCH_X86_64 || (KMP_OS_WINDOWS && KMP_ARCH_AARCH64)
-+#if KMP_ARCH_X86 || KMP_ARCH_X86_64 || KMP_ARCH_X86_X32 || (KMP_OS_WINDOWS && KMP_ARCH_AARCH64)
+-#if KMP_ARCH_X86 || KMP_ARCH_X86_64 || (KMP_OS_WINDOWS && (KMP_ARCH_AARCH64 || KMP_ARCH_ARM))
++#if KMP_ARCH_X86 || KMP_ARCH_X86_64 || KMP_ARCH_X86_X32 || (KMP_OS_WINDOWS && (KMP_ARCH_AARCH64 || KMP_ARCH_ARM))
  extern void
  __kmp_initialize_system_tick(void); /* Initialize timer tick value */
  #endif
@@ -409,15 +409,6 @@ index b099eb6..37bfce9 100644
  
  ATOMIC_CMPXCHG_CMPLX(cmplx4, kmp_cmplx32, add, 64, +, cmplx8, kmp_cmplx64, 8c,
                       7, KMP_ARCH_X86) // __kmpc_atomic_cmplx4_add_cmplx8
-@@ -1855,7 +1855,7 @@ ATOMIC_CMPXCHG_CMPLX(cmplx4, kmp_cmplx32, div, 64, /, cmplx8, kmp_cmplx64, 8c,
-                      7, KMP_ARCH_X86) // __kmpc_atomic_cmplx4_div_cmplx8
- 
- // READ, WRITE, CAPTURE are supported only on IA-32 architecture and Intel(R) 64
--#if KMP_ARCH_X86 || KMP_ARCH_X86_64
-+#if KMP_ARCH_X86 || KMP_ARCH_X86_64 || KMP_ARCH_X86_X32
- 
- // ------------------------------------------------------------------------
- // Atomic READ routines
 @@ -3326,7 +3326,7 @@ ATOMIC_CRITICAL_SWP(cmplx16_a16, kmp_cmplx128_a16_t, 32c,
  
  #endif // OMP_40_ENABLED
@@ -476,15 +467,6 @@ index 77df975..95ad070 100644
  
  #endif // OMP_40_ENABLED
  
-@@ -999,7 +999,7 @@ void __kmpc_atomic_32(ident_t *id_ref, int gtid, void *lhs, void *rhs,
-                       void (*f)(void *, void *, void *));
- 
- // READ, WRITE, CAPTURE are supported only on IA-32 architecture and Intel(R) 64
--#if KMP_ARCH_X86 || KMP_ARCH_X86_64
-+#if KMP_ARCH_X86 || KMP_ARCH_X86_64 || KMP_ARCH_X86_X32
- 
- //  Below routines for atomic READ are listed
- char __kmpc_atomic_fixed1_rd(ident_t *id_ref, int gtid, char *loc);
 @@ -1763,7 +1763,7 @@ long double __kmpc_atomic_float10_div_cpt_rev_fp(ident_t *id_ref, int gtid,
  
  #endif // OMP_40_ENABLED
@@ -514,15 +496,6 @@ index 815fe23..b0b1b24 100644
  
      this_thr->th.th_team = serial_team->t.t_parent;
      this_thr->th.th_info.ds.ds_tid = serial_team->t.t_master_tid;
-@@ -597,7 +597,7 @@ void __kmpc_flush(ident_t *loc) {
-   /* need explicit __mf() here since use volatile instead in library */
-   KMP_MB(); /* Flush all pending memory write invalidates.  */
- 
--#if (KMP_ARCH_X86 || KMP_ARCH_X86_64)
-+#if (KMP_ARCH_X86 || KMP_ARCH_X86_64 || KMP_ARCH_X86_X32)
- #if KMP_MIC
- // fence-style instructions do not exist, but lock; xaddl $0,(%rsp) can be used.
- // We shouldn't need it, though, since the ABI rules require that
 @@ -1210,7 +1210,7 @@ static __forceinline kmp_dyna_lockseq_t __kmp_map_hint_to_lock(uintptr_t hint) {
  #define KMP_TSX_LOCK(seq) __kmp_user_lock_seq
  #endif
@@ -690,20 +663,20 @@ index fbd3513..7224619 100644
  #define KMP_USE_X87CONTROL 0
  #if KMP_OS_WINDOWS
 @@ -164,7 +164,7 @@
- #define KMP_UINT64_SPEC "llu"
  #endif /* KMP_OS_UNIX */
  
--#if KMP_ARCH_X86 || KMP_ARCH_ARM || KMP_ARCH_MIPS
-+#if KMP_ARCH_X86 || KMP_ARCH_X86_X32 || KMP_ARCH_ARM || KMP_ARCH_MIPS
+ #if KMP_ARCH_X86 || KMP_ARCH_ARM || KMP_ARCH_MIPS || KMP_ARCH_WASM ||          \
+-    KMP_ARCH_PPC || KMP_ARCH_AARCH64_32
++    KMP_ARCH_PPC || KMP_ARCH_AARCH64_32 || KMP_ARCH_X86_X32
  #define KMP_SIZE_T_SPEC KMP_UINT32_SPEC
  #elif KMP_ARCH_X86_64 || KMP_ARCH_PPC64 || KMP_ARCH_AARCH64 ||                 \
-     KMP_ARCH_MIPS64 || KMP_ARCH_RISCV64
+     KMP_ARCH_MIPS64 || KMP_ARCH_RISCV64 || KMP_ARCH_LOONGARCH64 ||             \
 @@ -173,7 +173,7 @@ typedef unsigned long long kmp_uint64;
  #error "Can't determine size_t printf format specifier."
  #endif
  
--#if KMP_ARCH_X86
-+#if KMP_ARCH_X86 || KMP_ARCH_X86_X32
+-#if KMP_ARCH_X86 || KMP_ARCH_ARM || KMP_ARCH_WASM || KMP_ARCH_PPC
++#if KMP_ARCH_X86 || KMP_ARCH_X86_X32 || KMP_ARCH_ARM
  #define KMP_SIZE_T_MAX (0xFFFFFFFF)
  #else
  #define KMP_SIZE_T_MAX (0xFFFFFFFFFFFFFFFF)
@@ -766,20 +739,6 @@ index 534409e..fe7b764 100644
  
  static void __kmp_alloc_argv_entries(int argc, kmp_team_t *team,
                                       int realloc); // forward declaration
-@@ -1721,11 +1721,11 @@ int __kmp_fork_call(ident_t *loc, int gtid,
-     if (nthreads == 1) {
- /* josh todo: hypothetical question: what do we do for OS X*? */
- #if KMP_OS_LINUX &&                                                            \
--    (KMP_ARCH_X86 || KMP_ARCH_X86_64 || KMP_ARCH_ARM || KMP_ARCH_AARCH64)
-+    (KMP_ARCH_X86 || KMP_ARCH_X86_64 || KMP_ARCH_X86_X32 || KMP_ARCH_ARM || KMP_ARCH_AARCH64)
-       void *args[argc];
- #else
-       void **args = (void **)KMP_ALLOCA(argc * sizeof(void *));
--#endif /* KMP_OS_LINUX && ( KMP_ARCH_X86 || KMP_ARCH_X86_64 || KMP_ARCH_ARM || \
-+#endif /* KMP_OS_LINUX && ( KMP_ARCH_X86 || KMP_ARCH_X86_64 || KMP_ARCH_X86_X32 || KMP_ARCH_ARM || \
-           KMP_ARCH_AARCH64) */
- 
-       KA_TRACE(20,
 @@ -4470,11 +4470,11 @@ static void __kmp_initialize_team(kmp_team_t *team, int new_nproc,
    // TODO???: team->t.t_max_active_levels       = new_max_active_levels;
    team->t.t_sched.sched = new_icvs->sched.sched;
@@ -819,15 +778,15 @@ index 534409e..fe7b764 100644
  
  #if KMP_OS_UNIX
  #if KMP_HANDLE_SIGNALS
-@@ -7673,7 +7673,7 @@ __kmp_determine_reduction_method(
- #endif // KMP_OS_LINUX || KMP_OS_FREEBSD || KMP_OS_NETBSD || KMP_OS_WINDOWS ||
- // KMP_OS_DARWIN
+@@ -8929,7 +8929,7 @@ __kmp_determine_reduction_method(
+        // KMP_OS_SOLARIS || KMP_OS_WASI || KMP_OS_AIX
  
--#elif KMP_ARCH_X86 || KMP_ARCH_ARM || KMP_ARCH_AARCH || KMP_ARCH_MIPS
-+#elif KMP_ARCH_X86 || KMP_ARCH_X86_X32 || KMP_ARCH_ARM || KMP_ARCH_AARCH || KMP_ARCH_MIPS
+ #elif KMP_ARCH_X86 || KMP_ARCH_ARM || KMP_ARCH_AARCH || KMP_ARCH_MIPS ||       \
+-    KMP_ARCH_WASM || KMP_ARCH_PPC || KMP_ARCH_AARCH64_32
++    KMP_ARCH_WASM || KMP_ARCH_PPC || KMP_ARCH_AARCH64_32 || KMP_ARCH_X86_X32
  
- #if KMP_OS_LINUX || KMP_OS_WINDOWS
- 
+ #if KMP_OS_LINUX || KMP_OS_DRAGONFLY || KMP_OS_FREEBSD || KMP_OS_NETBSD ||     \
+     KMP_OS_OPENBSD || KMP_OS_WINDOWS || KMP_OS_HURD || KMP_OS_SOLARIS ||       \
 diff --git a/openmp/runtime/src/kmp_settings.cpp b/openmp/runtime/src/kmp_settings.cpp
 index 10beee4..9e9ce55 100644
 --- a/openmp/runtime/src/kmp_settings.cpp
@@ -1035,8 +994,8 @@ index fa9b1c5..4f694cb 100644
  
  #endif // KMP_USE_FUTEX
  
--#if (KMP_ARCH_X86 || KMP_ARCH_X86_64) && (!KMP_ASM_INTRINS)
-+#if (KMP_ARCH_X86 || KMP_ARCH_X86_64 || KMP_ARCH_X86_X32) && (!KMP_ASM_INTRINS)
+-#if (KMP_ARCH_X86 || KMP_ARCH_X86_64 || KMP_ARCH_WASM) && (!KMP_ASM_INTRINS)
++#if (KMP_ARCH_X86 || KMP_ARCH_X86_64 || KMP_ARCH_X86_X32 || KMP_ARCH_WASM) && (!KMP_ASM_INTRINS)
  /* Only 32-bit "add-exchange" instruction on IA-32 architecture causes us to
     use compare_and_store for these routines */
  
