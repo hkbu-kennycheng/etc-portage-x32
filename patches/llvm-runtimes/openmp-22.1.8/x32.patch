@@ -1,44 +1,45 @@
-From 33bf3ad6f385cc9630fd78549c81bec491428a87 Mon Sep 17 00:00:00 2001
+From 36790d39c6ee9120feb4f1a1fe17fb6303f41c9c Mon Sep 17 00:00:00 2001
 From: Kenny Cheng <kennycheng@hkbu.edu.hk>
-Date: Thu, 9 Jul 2026 02:23:56 +0800
-Subject: [PATCH] x32 patch updates
+Date: Thu, 9 Jul 2026 07:37:53 +0800
+Subject: [PATCH] patched
 
 ---
- openmp/cmake/modules/LibompHandleFlags.cmake  | 23 ++++--
- openmp/cmake/modules/LibompUtils.cmake        |  2 +
- openmp/runtime/CMakeLists.txt                 | 17 ++++-
- .../runtime/cmake/LibompGetArchitecture.cmake |  6 +-
- openmp/runtime/cmake/LibompMicroTests.cmake   |  7 ++
- openmp/runtime/cmake/config-ix.cmake          | 10 +--
- openmp/runtime/src/kmp.h                      | 34 ++++-----
- openmp/runtime/src/kmp_affinity.cpp           | 20 +++---
- openmp/runtime/src/kmp_atomic.cpp             | 72 +++++++++----------
- openmp/runtime/src/kmp_atomic.h               |  8 +--
- openmp/runtime/src/kmp_csupport.cpp           | 10 +--
- openmp/runtime/src/kmp_global.cpp             |  6 +-
- openmp/runtime/src/kmp_lock.cpp               |  2 +-
- openmp/runtime/src/kmp_lock.h                 | 12 ++--
- openmp/runtime/src/kmp_os.h                   | 20 +++---
- openmp/runtime/src/kmp_platform.h             | 12 +++-
- openmp/runtime/src/kmp_runtime.cpp            | 18 ++---
- openmp/runtime/src/kmp_settings.cpp           | 22 +++---
- openmp/runtime/src/kmp_stats.cpp              |  2 +-
- openmp/runtime/src/kmp_stats_timing.cpp       |  2 +-
- openmp/runtime/src/kmp_utility.cpp            |  4 +-
- openmp/runtime/src/z_Linux_asm.S              |  2 +-
- openmp/runtime/src/z_Linux_util.cpp           | 16 ++---
- openmp/runtime/src/z_Windows_NT-586_util.cpp  |  8 +--
- openmp/runtime/src/z_Windows_NT_util.cpp      |  8 +--
- openmp/runtime/test/atomic/kmp_atomic_cas.c   |  4 +-
- .../runtime/test/atomic/kmp_atomic_cas_cpt.c  |  4 +-
+ cmake/modules/LibompHandleFlags.cmake         | 23 ++++--
+ cmake/modules/LibompUtils.cmake               |  2 +
+ runtime/CMakeLists.txt                        | 17 ++++-
+ runtime/cmake/LibompGetArchitecture.cmake     |  6 +-
+ runtime/cmake/LibompMicroTests.cmake          |  7 ++
+ runtime/cmake/config-ix.cmake                 | 10 +--
+ runtime/src/kmp.h                             | 34 ++++-----
+ runtime/src/kmp_affinity.cpp                  | 20 +++---
+ runtime/src/kmp_affinity.h                    |  4 +-
+ runtime/src/kmp_atomic.cpp                    | 72 +++++++++----------
+ runtime/src/kmp_atomic.h                      |  8 +--
+ runtime/src/kmp_csupport.cpp                  | 10 +--
+ runtime/src/kmp_global.cpp                    |  6 +-
+ runtime/src/kmp_lock.cpp                      |  2 +-
+ runtime/src/kmp_lock.h                        | 12 ++--
+ runtime/src/kmp_os.h                          | 20 +++---
+ runtime/src/kmp_platform.h                    | 12 +++-
+ runtime/src/kmp_runtime.cpp                   | 18 ++---
+ runtime/src/kmp_settings.cpp                  | 22 +++---
+ runtime/src/kmp_stats.cpp                     |  2 +-
+ runtime/src/kmp_stats_timing.cpp              |  2 +-
+ runtime/src/kmp_utility.cpp                   |  4 +-
+ runtime/src/z_Linux_asm.S                     |  2 +-
+ runtime/src/z_Linux_util.cpp                  | 16 ++---
+ runtime/src/z_Windows_NT-586_util.cpp         |  8 +--
+ runtime/src/z_Windows_NT_util.cpp             |  8 +--
+ runtime/test/atomic/kmp_atomic_cas.c          |  4 +-
+ runtime/test/atomic/kmp_atomic_cas_cpt.c      |  4 +-
  .../test/atomic/kmp_atomic_float10_max_min.c  |  4 +-
- openmp/runtime/test/ompt/callback.h           |  2 +-
- 29 files changed, 201 insertions(+), 156 deletions(-)
+ runtime/test/ompt/callback.h                  |  2 +-
+ 30 files changed, 203 insertions(+), 158 deletions(-)
 
-diff --git a/openmp/cmake/modules/LibompHandleFlags.cmake b/openmp/cmake/modules/LibompHandleFlags.cmake
+diff --git a/cmake/modules/LibompHandleFlags.cmake b/cmake/modules/LibompHandleFlags.cmake
 index 77ccb3e..964e816 100644
---- a/openmp/cmake/modules/LibompHandleFlags.cmake
-+++ b/openmp/cmake/modules/LibompHandleFlags.cmake
+--- a/cmake/modules/LibompHandleFlags.cmake
++++ b/cmake/modules/LibompHandleFlags.cmake
 @@ -48,7 +48,7 @@ function(libomp_get_cxxflags cxxflags)
    libomp_append(flags_local /GS LIBOMP_HAVE_GS_FLAG)
    libomp_append(flags_local /EHsc LIBOMP_HAVE_EHSC_FLAG)
@@ -109,10 +110,10 @@ index 77ccb3e..964e816 100644
    else()
      set(libomp_gdflag_arch arch_${LIBOMP_ARCH})
    endif()
-diff --git a/openmp/cmake/modules/LibompUtils.cmake b/openmp/cmake/modules/LibompUtils.cmake
+diff --git a/cmake/modules/LibompUtils.cmake b/cmake/modules/LibompUtils.cmake
 index a810881..1d215db 100644
---- a/openmp/cmake/modules/LibompUtils.cmake
-+++ b/openmp/cmake/modules/LibompUtils.cmake
+--- a/cmake/modules/LibompUtils.cmake
++++ b/cmake/modules/LibompUtils.cmake
 @@ -91,6 +91,8 @@ function(libomp_get_legal_arch return_arch_string)
      set(${return_arch_string} "IA-32" PARENT_SCOPE)
    elseif(${INTEL64})
@@ -122,10 +123,10 @@ index a810881..1d215db 100644
    elseif(${MIC})
      set(${return_arch_string} "Intel(R) Many Integrated Core Architecture" PARENT_SCOPE)
    elseif(${ARM})
-diff --git a/openmp/runtime/CMakeLists.txt b/openmp/runtime/CMakeLists.txt
+diff --git a/runtime/CMakeLists.txt b/runtime/CMakeLists.txt
 index 9332ca3..5440cc2 100644
---- a/openmp/runtime/CMakeLists.txt
-+++ b/openmp/runtime/CMakeLists.txt
+--- a/runtime/CMakeLists.txt
++++ b/runtime/CMakeLists.txt
 @@ -40,9 +40,17 @@ else() # Part of LLVM build
    elseif(LIBOMP_NATIVE_ARCH STREQUAL "x86")
      set(LIBOMP_ARCH i386)
@@ -172,10 +173,10 @@ index 9332ca3..5440cc2 100644
  elseif("${LIBOMP_ARCH}" STREQUAL "x86_64" OR "${LIBOMP_ARCH}" STREQUAL "32e") # Intel(R) 64 architecture
    set(INTEL64 TRUE)
  elseif("${LIBOMP_ARCH}" STREQUAL "arm") # ARM architecture
-diff --git a/openmp/runtime/cmake/LibompGetArchitecture.cmake b/openmp/runtime/cmake/LibompGetArchitecture.cmake
+diff --git a/runtime/cmake/LibompGetArchitecture.cmake b/runtime/cmake/LibompGetArchitecture.cmake
 index 81aa700..2de4910 100644
---- a/openmp/runtime/cmake/LibompGetArchitecture.cmake
-+++ b/openmp/runtime/cmake/LibompGetArchitecture.cmake
+--- a/runtime/cmake/LibompGetArchitecture.cmake
++++ b/runtime/cmake/LibompGetArchitecture.cmake
 @@ -17,8 +17,12 @@ function(libomp_get_architecture return_arch)
    set(detect_arch_src_txt "
      #if defined(__KNC__)
@@ -190,10 +191,10 @@ index 81aa700..2de4910 100644
      #elif defined(__i386) || defined(__i386__) || defined(__IA32__) || defined(_M_I86) || defined(_M_IX86) || defined(__X86__) || defined(_X86_)
        #error ARCHITECTURE=i386
      #elif defined(__ARM_ARCH_7__) || defined(__ARM_ARCH_7R__) ||  defined(__ARM_ARCH_7A__) || defined(__ARM_ARCH_7M__)  || defined(__ARM_ARCH_7S__)
-diff --git a/openmp/runtime/cmake/LibompMicroTests.cmake b/openmp/runtime/cmake/LibompMicroTests.cmake
+diff --git a/runtime/cmake/LibompMicroTests.cmake b/runtime/cmake/LibompMicroTests.cmake
 index 0d48246..ef7a3b9 100644
---- a/openmp/runtime/cmake/LibompMicroTests.cmake
-+++ b/openmp/runtime/cmake/LibompMicroTests.cmake
+--- a/runtime/cmake/LibompMicroTests.cmake
++++ b/runtime/cmake/LibompMicroTests.cmake
 @@ -75,6 +75,9 @@ else() # (Unix based systems, Intel(R) MIC Architecture, and Mac)
    if(${IA32})
      libomp_append(libomp_test_touch_cflags -m32 LIBOMP_HAVE_M32_FLAG)
@@ -215,10 +216,10 @@ index 0d48246..ef7a3b9 100644
      elseif(${INTEL64})
        libomp_append(libomp_expected_library_deps libc.so.6)
        libomp_append(libomp_expected_library_deps ld-linux-x86-64.so.2)
-diff --git a/openmp/runtime/cmake/config-ix.cmake b/openmp/runtime/cmake/config-ix.cmake
+diff --git a/runtime/cmake/config-ix.cmake b/runtime/cmake/config-ix.cmake
 index 150a0c3..0928fda 100644
---- a/openmp/runtime/cmake/config-ix.cmake
-+++ b/openmp/runtime/cmake/config-ix.cmake
+--- a/runtime/cmake/config-ix.cmake
++++ b/runtime/cmake/config-ix.cmake
 @@ -71,6 +71,7 @@ check_cxx_compiler_flag(-msse2 LIBOMP_HAVE_MSSE2_FLAG)
  check_cxx_compiler_flag(-ftls-model=initial-exec LIBOMP_HAVE_FTLS_MODEL_FLAG)
  libomp_check_architecture_flag(-mmic LIBOMP_HAVE_MMIC_FLAG)
@@ -271,10 +272,10 @@ index 150a0c3..0928fda 100644
    set(LIBOMP_HAVE_TSAN_SUPPORT TRUE)
  else()
    set(LIBOMP_HAVE_TSAN_SUPPORT FALSE)
-diff --git a/openmp/runtime/src/kmp.h b/openmp/runtime/src/kmp.h
+diff --git a/runtime/src/kmp.h b/runtime/src/kmp.h
 index 36c40ab..d1537a2 100644
---- a/openmp/runtime/src/kmp.h
-+++ b/openmp/runtime/src/kmp.h
+--- a/runtime/src/kmp.h
++++ b/runtime/src/kmp.h
 @@ -29,7 +29,7 @@
  #endif
  #define KMP_WEIGHTED_ITERATIONS_SUPPORTED                                      \
@@ -417,10 +418,10 @@ index 36c40ab..d1537a2 100644
  extern void
  __kmp_initialize_system_tick(void); /* Initialize timer tick value */
  #endif
-diff --git a/openmp/runtime/src/kmp_affinity.cpp b/openmp/runtime/src/kmp_affinity.cpp
+diff --git a/runtime/src/kmp_affinity.cpp b/runtime/src/kmp_affinity.cpp
 index 6a0e291..3d185e8 100644
---- a/openmp/runtime/src/kmp_affinity.cpp
-+++ b/openmp/runtime/src/kmp_affinity.cpp
+--- a/runtime/src/kmp_affinity.cpp
++++ b/runtime/src/kmp_affinity.cpp
 @@ -174,7 +174,7 @@ const char *__kmp_hw_get_core_type_string(kmp_hw_core_type_t type) {
    case KMP_HW_CORE_TYPE_UNKNOWN:
    case KMP_HW_MAX_NUM_CORE_TYPES:
@@ -511,10 +512,32 @@ index 6a0e291..3d185e8 100644
  
    else if (__kmp_affinity_top_method == affinity_top_method_cpuinfo) {
      int line = 0;
-diff --git a/openmp/runtime/src/kmp_atomic.cpp b/openmp/runtime/src/kmp_atomic.cpp
+diff --git a/runtime/src/kmp_affinity.h b/runtime/src/kmp_affinity.h
+index fa69585..49080f8 100644
+--- a/runtime/src/kmp_affinity.h
++++ b/runtime/src/kmp_affinity.h
+@@ -201,7 +201,7 @@ public:
+    all systems of the same arch where they are defined, and they cannot change.
+    stone forever. */
+ #include <sys/syscall.h>
+-#if KMP_ARCH_X86 || KMP_ARCH_ARM
++#if KMP_ARCH_X86 || KMP_ARCH_ARM || KMP_ARCH_X86_X32
+ #ifndef __NR_sched_setaffinity
+ #define __NR_sched_setaffinity 241
+ #elif __NR_sched_setaffinity != 241
+@@ -223,7 +223,7 @@ public:
+ #elif __NR_sched_getaffinity != 123
+ #error Wrong code for getaffinity system call.
+ #endif /* __NR_sched_getaffinity */
+-#elif KMP_ARCH_X86_64
++#elif KMP_ARCH_X86_64 || KMP_ARCH_X86_X32
+ #ifndef __NR_sched_setaffinity
+ #define __NR_sched_setaffinity 203
+ #elif __NR_sched_setaffinity != 203
+diff --git a/runtime/src/kmp_atomic.cpp b/runtime/src/kmp_atomic.cpp
 index 261e9f1..4c4e772 100644
---- a/openmp/runtime/src/kmp_atomic.cpp
-+++ b/openmp/runtime/src/kmp_atomic.cpp
+--- a/runtime/src/kmp_atomic.cpp
++++ b/runtime/src/kmp_atomic.cpp
 @@ -865,7 +865,7 @@ static inline kmp_cmplx128_a16_t operator/(kmp_cmplx128_a16_t &lhs,
  
  #endif // KMP_OS_WINDOWS && (KMP_ARCH_AARCH64 || KMP_ARCH_ARM)
@@ -823,10 +846,10 @@ index 261e9f1..4c4e772 100644
  
  /*!
  @}
-diff --git a/openmp/runtime/src/kmp_atomic.h b/openmp/runtime/src/kmp_atomic.h
+diff --git a/runtime/src/kmp_atomic.h b/runtime/src/kmp_atomic.h
 index 4fc51ee..0c54625 100644
---- a/openmp/runtime/src/kmp_atomic.h
-+++ b/openmp/runtime/src/kmp_atomic.h
+--- a/runtime/src/kmp_atomic.h
++++ b/runtime/src/kmp_atomic.h
 @@ -701,7 +701,7 @@ void __kmpc_atomic_cmplx16_div_a16(ident_t *id_ref, int gtid,
  
  // OpenMP 4.0: x = expr binop x for non-commutative operations.
@@ -863,10 +886,10 @@ index 4fc51ee..0c54625 100644
  
  /* ------------------------------------------------------------------------ */
  
-diff --git a/openmp/runtime/src/kmp_csupport.cpp b/openmp/runtime/src/kmp_csupport.cpp
+diff --git a/runtime/src/kmp_csupport.cpp b/runtime/src/kmp_csupport.cpp
 index a92fc46..9dedaac 100644
---- a/openmp/runtime/src/kmp_csupport.cpp
-+++ b/openmp/runtime/src/kmp_csupport.cpp
+--- a/runtime/src/kmp_csupport.cpp
++++ b/runtime/src/kmp_csupport.cpp
 @@ -711,13 +711,13 @@ void __kmpc_end_serialized_parallel(ident_t *loc, kmp_int32 global_tid) {
  
      /* return to the parallel section */
@@ -910,10 +933,10 @@ index a92fc46..9dedaac 100644
      // "fast" path implemented to fix customer performance issue
      kmp_tas_lock_t *tl = (kmp_tas_lock_t *)user_lock;
  #if USE_ITT_BUILD
-diff --git a/openmp/runtime/src/kmp_global.cpp b/openmp/runtime/src/kmp_global.cpp
+diff --git a/runtime/src/kmp_global.cpp b/runtime/src/kmp_global.cpp
 index 6c3b576..19d50ad 100644
---- a/openmp/runtime/src/kmp_global.cpp
-+++ b/openmp/runtime/src/kmp_global.cpp
+--- a/runtime/src/kmp_global.cpp
++++ b/runtime/src/kmp_global.cpp
 @@ -18,7 +18,7 @@
  
  kmp_key_t __kmp_gtid_threadprivate_key;
@@ -937,10 +960,10 @@ index 6c3b576..19d50ad 100644
  
  #ifdef USE_LOAD_BALANCE
  double __kmp_load_balance_interval = 1.0;
-diff --git a/openmp/runtime/src/kmp_lock.cpp b/openmp/runtime/src/kmp_lock.cpp
+diff --git a/runtime/src/kmp_lock.cpp b/runtime/src/kmp_lock.cpp
 index fd13003..c67f021 100644
---- a/openmp/runtime/src/kmp_lock.cpp
-+++ b/openmp/runtime/src/kmp_lock.cpp
+--- a/runtime/src/kmp_lock.cpp
++++ b/runtime/src/kmp_lock.cpp
 @@ -2633,7 +2633,7 @@ static void __kmp_set_drdpa_lock_flags(kmp_drdpa_lock_t *lck,
  }
  
@@ -950,10 +973,10 @@ index fd13003..c67f021 100644
  #define __kmp_tsc() __kmp_hardware_timestamp()
  // Runtime's default backoff parameters
  kmp_backoff_t __kmp_spin_backoff_params = {1, 4096, 100};
-diff --git a/openmp/runtime/src/kmp_lock.h b/openmp/runtime/src/kmp_lock.h
+diff --git a/runtime/src/kmp_lock.h b/runtime/src/kmp_lock.h
 index 6202f3d..8715163 100644
---- a/openmp/runtime/src/kmp_lock.h
-+++ b/openmp/runtime/src/kmp_lock.h
+--- a/runtime/src/kmp_lock.h
++++ b/runtime/src/kmp_lock.h
 @@ -168,7 +168,7 @@ extern void __kmp_destroy_nested_tas_lock(kmp_tas_lock_t *lck);
  #ifndef KMP_USE_FUTEX
  #define KMP_USE_FUTEX                                                          \
@@ -1008,10 +1031,10 @@ index 6202f3d..8715163 100644
  #define KMP_USE_INLINED_FUTEX KMP_USE_FUTEX && 0
  
  // List of lock definitions; all nested locks are indirect locks.
-diff --git a/openmp/runtime/src/kmp_os.h b/openmp/runtime/src/kmp_os.h
+diff --git a/runtime/src/kmp_os.h b/runtime/src/kmp_os.h
 index e8ad2a6..45f2383 100644
---- a/openmp/runtime/src/kmp_os.h
-+++ b/openmp/runtime/src/kmp_os.h
+--- a/runtime/src/kmp_os.h
++++ b/runtime/src/kmp_os.h
 @@ -97,7 +97,7 @@
  
  /* Check for quad-precision extension. */
@@ -1097,10 +1120,10 @@ index e8ad2a6..45f2383 100644
  #endif
  
  // Warning levels
-diff --git a/openmp/runtime/src/kmp_platform.h b/openmp/runtime/src/kmp_platform.h
+diff --git a/runtime/src/kmp_platform.h b/runtime/src/kmp_platform.h
 index 609b7c4..286e261 100644
---- a/openmp/runtime/src/kmp_platform.h
-+++ b/openmp/runtime/src/kmp_platform.h
+--- a/runtime/src/kmp_platform.h
++++ b/runtime/src/kmp_platform.h
 @@ -116,6 +116,7 @@
  /* ---------------------- Architecture recognition ------------------- */
  
@@ -1142,10 +1165,10 @@ index 609b7c4..286e261 100644
                KMP_ARCH_AARCH64 + KMP_ARCH_MIPS + KMP_ARCH_MIPS64 +             \
                KMP_ARCH_RISCV64 + KMP_ARCH_LOONGARCH64 + KMP_ARCH_VE +          \
                KMP_ARCH_S390X + KMP_ARCH_WASM + KMP_ARCH_PPC +                  \
-diff --git a/openmp/runtime/src/kmp_runtime.cpp b/openmp/runtime/src/kmp_runtime.cpp
+diff --git a/runtime/src/kmp_runtime.cpp b/runtime/src/kmp_runtime.cpp
 index 48e29c9..9a98a4b 100644
---- a/openmp/runtime/src/kmp_runtime.cpp
-+++ b/openmp/runtime/src/kmp_runtime.cpp
+--- a/runtime/src/kmp_runtime.cpp
++++ b/runtime/src/kmp_runtime.cpp
 @@ -1113,7 +1113,7 @@ static void __kmp_fork_team_threads(kmp_root_t *root, kmp_team_t *team,
    KMP_MB();
  }
@@ -1217,10 +1240,10 @@ index 48e29c9..9a98a4b 100644
  
  #if KMP_OS_UNIX
  #if KMP_HANDLE_SIGNALS
-diff --git a/openmp/runtime/src/kmp_settings.cpp b/openmp/runtime/src/kmp_settings.cpp
+diff --git a/runtime/src/kmp_settings.cpp b/runtime/src/kmp_settings.cpp
 index b6e7e9c..40ef4c1 100644
---- a/openmp/runtime/src/kmp_settings.cpp
-+++ b/openmp/runtime/src/kmp_settings.cpp
+--- a/runtime/src/kmp_settings.cpp
++++ b/runtime/src/kmp_settings.cpp
 @@ -789,7 +789,7 @@ static void __kmp_stg_print_duplicate_lib_ok(kmp_str_buf_t *buffer,
  // -----------------------------------------------------------------------------
  // KMP_INHERIT_FP_CONTROL
@@ -1315,10 +1338,10 @@ index b6e7e9c..40ef4c1 100644
  
  #ifdef KMP_GOMP_COMPAT
      {"GOMP_STACKSIZE", __kmp_stg_parse_stacksize, NULL, NULL, 0, 0},
-diff --git a/openmp/runtime/src/kmp_stats.cpp b/openmp/runtime/src/kmp_stats.cpp
+diff --git a/runtime/src/kmp_stats.cpp b/runtime/src/kmp_stats.cpp
 index 8657bfe..faa2be1 100644
---- a/openmp/runtime/src/kmp_stats.cpp
-+++ b/openmp/runtime/src/kmp_stats.cpp
+--- a/runtime/src/kmp_stats.cpp
++++ b/runtime/src/kmp_stats.cpp
 @@ -774,7 +774,7 @@ void kmp_stats_output_module::printHeaderInfo(FILE *statsOut) {
    fprintf(statsOut, "# Time of run: %s\n", &buffer[0]);
    if (gethostname(&hostName[0], sizeof(hostName)) == 0)
@@ -1328,10 +1351,10 @@ index 8657bfe..faa2be1 100644
    fprintf(statsOut, "# CPU:  %s\n", &__kmp_cpuinfo.name[0]);
    fprintf(statsOut, "# Family: %d, Model: %d, Stepping: %d\n",
            __kmp_cpuinfo.family, __kmp_cpuinfo.model, __kmp_cpuinfo.stepping);
-diff --git a/openmp/runtime/src/kmp_stats_timing.cpp b/openmp/runtime/src/kmp_stats_timing.cpp
+diff --git a/runtime/src/kmp_stats_timing.cpp b/runtime/src/kmp_stats_timing.cpp
 index bdfe68c..2fb1818 100644
---- a/openmp/runtime/src/kmp_stats_timing.cpp
-+++ b/openmp/runtime/src/kmp_stats_timing.cpp
+--- a/runtime/src/kmp_stats_timing.cpp
++++ b/runtime/src/kmp_stats_timing.cpp
 @@ -28,7 +28,7 @@ double tsc_tick_count::tick_time() {
    // pretty bad assumption of 1GHz clock for MIC
    return 1 / ((double)1000 * 1.e6);
@@ -1341,10 +1364,10 @@ index bdfe68c..2fb1818 100644
  #include <string.h>
  // Extract the value from the CPUID information
  double tsc_tick_count::tick_time() {
-diff --git a/openmp/runtime/src/kmp_utility.cpp b/openmp/runtime/src/kmp_utility.cpp
+diff --git a/runtime/src/kmp_utility.cpp b/runtime/src/kmp_utility.cpp
 index bfa450c..240c819 100644
---- a/openmp/runtime/src/kmp_utility.cpp
-+++ b/openmp/runtime/src/kmp_utility.cpp
+--- a/runtime/src/kmp_utility.cpp
++++ b/runtime/src/kmp_utility.cpp
 @@ -18,7 +18,7 @@
  
  static const char *unknown = "unknown";
@@ -1363,10 +1386,10 @@ index bfa450c..240c819 100644
  
  void __kmp_expand_host_name(char *buffer, size_t size) {
    KMP_DEBUG_ASSERT(size >= sizeof(unknown));
-diff --git a/openmp/runtime/src/z_Linux_asm.S b/openmp/runtime/src/z_Linux_asm.S
+diff --git a/runtime/src/z_Linux_asm.S b/runtime/src/z_Linux_asm.S
 index 12fea67..a89ecf0 100644
---- a/openmp/runtime/src/z_Linux_asm.S
-+++ b/openmp/runtime/src/z_Linux_asm.S
+--- a/runtime/src/z_Linux_asm.S
++++ b/runtime/src/z_Linux_asm.S
 @@ -17,7 +17,7 @@
  
  #include "kmp_config.h"
@@ -1376,10 +1399,10 @@ index 12fea67..a89ecf0 100644
  .att_syntax
  
  # if defined(__ELF__) && defined(__CET__) && defined(__has_include)
-diff --git a/openmp/runtime/src/z_Linux_util.cpp b/openmp/runtime/src/z_Linux_util.cpp
+diff --git a/runtime/src/z_Linux_util.cpp b/runtime/src/z_Linux_util.cpp
 index c7fe064..9cefb75 100644
---- a/openmp/runtime/src/z_Linux_util.cpp
-+++ b/openmp/runtime/src/z_Linux_util.cpp
+--- a/runtime/src/z_Linux_util.cpp
++++ b/runtime/src/z_Linux_util.cpp
 @@ -321,7 +321,7 @@ int __kmp_futex_determine_capable() {
  
  #endif // KMP_USE_FUTEX
@@ -1445,10 +1468,10 @@ index c7fe064..9cefb75 100644
        KMP_ARCH_PPC64 || KMP_ARCH_RISCV64 || KMP_ARCH_LOONGARCH64 ||            \
        KMP_ARCH_ARM || KMP_ARCH_VE || KMP_ARCH_S390X || KMP_ARCH_PPC_XCOFF ||   \
        KMP_ARCH_AARCH64_32)
-diff --git a/openmp/runtime/src/z_Windows_NT-586_util.cpp b/openmp/runtime/src/z_Windows_NT-586_util.cpp
+diff --git a/runtime/src/z_Windows_NT-586_util.cpp b/runtime/src/z_Windows_NT-586_util.cpp
 index 37759fe..2cfab41 100644
---- a/openmp/runtime/src/z_Windows_NT-586_util.cpp
-+++ b/openmp/runtime/src/z_Windows_NT-586_util.cpp
+--- a/runtime/src/z_Windows_NT-586_util.cpp
++++ b/runtime/src/z_Windows_NT-586_util.cpp
 @@ -12,7 +12,7 @@
  
  #include "kmp.h"
@@ -1482,10 +1505,10 @@ index 37759fe..2cfab41 100644
  
 -#endif /* KMP_ARCH_X86 || KMP_ARCH_X86_64 || KMP_ARCH_AARCH64 || KMP_ARCH_ARM */
 +#endif /* KMP_ARCH_X86 || KMP_ARCH_X86_64 || KMP_ARCH_X86_X32 || KMP_ARCH_AARCH64 || KMP_ARCH_ARM */
-diff --git a/openmp/runtime/src/z_Windows_NT_util.cpp b/openmp/runtime/src/z_Windows_NT_util.cpp
+diff --git a/runtime/src/z_Windows_NT_util.cpp b/runtime/src/z_Windows_NT_util.cpp
 index d75b48b..c8890ed 100644
---- a/openmp/runtime/src/z_Windows_NT_util.cpp
-+++ b/openmp/runtime/src/z_Windows_NT_util.cpp
+--- a/runtime/src/z_Windows_NT_util.cpp
++++ b/runtime/src/z_Windows_NT_util.cpp
 @@ -717,11 +717,11 @@ void __kmp_runtime_initialize(void) {
  #endif /* USE_ITT_BUILD */
    __kmp_initialize_system_tick();
@@ -1515,10 +1538,10 @@ index d75b48b..c8890ed 100644
  
    if (__kmp_stkoffset > 0 && gtid > 0) {
      padding = KMP_ALLOCA(gtid * __kmp_stkoffset);
-diff --git a/openmp/runtime/test/atomic/kmp_atomic_cas.c b/openmp/runtime/test/atomic/kmp_atomic_cas.c
+diff --git a/runtime/test/atomic/kmp_atomic_cas.c b/runtime/test/atomic/kmp_atomic_cas.c
 index 5706701..d51ed02 100644
---- a/openmp/runtime/test/atomic/kmp_atomic_cas.c
-+++ b/openmp/runtime/test/atomic/kmp_atomic_cas.c
+--- a/runtime/test/atomic/kmp_atomic_cas.c
++++ b/runtime/test/atomic/kmp_atomic_cas.c
 @@ -35,7 +35,7 @@ __kmpc_atomic_val_8_cas(ident_t *loc, int gtid, long long *x, long long e,
  
  int main() {
@@ -1536,10 +1559,10 @@ index 5706701..d51ed02 100644
 +#endif // KMP_ARCH_X86 || KMP_ARCH_X86_64 || KMP_ARCH_X86_X32
    return ret;
  }
-diff --git a/openmp/runtime/test/atomic/kmp_atomic_cas_cpt.c b/openmp/runtime/test/atomic/kmp_atomic_cas_cpt.c
+diff --git a/runtime/test/atomic/kmp_atomic_cas_cpt.c b/runtime/test/atomic/kmp_atomic_cas_cpt.c
 index 676ecb8..08a0995 100644
---- a/openmp/runtime/test/atomic/kmp_atomic_cas_cpt.c
-+++ b/openmp/runtime/test/atomic/kmp_atomic_cas_cpt.c
+--- a/runtime/test/atomic/kmp_atomic_cas_cpt.c
++++ b/runtime/test/atomic/kmp_atomic_cas_cpt.c
 @@ -41,7 +41,7 @@ __kmpc_atomic_val_8_cas_cpt(ident_t *loc, int gtid, long long *x, long long e,
  
  int main() {
@@ -1557,10 +1580,10 @@ index 676ecb8..08a0995 100644
 +#endif // KMP_ARCH_X86 || KMP_ARCH_X86_64 || KMP_ARCH_X86_X32
    return ret;
  }
-diff --git a/openmp/runtime/test/atomic/kmp_atomic_float10_max_min.c b/openmp/runtime/test/atomic/kmp_atomic_float10_max_min.c
+diff --git a/runtime/test/atomic/kmp_atomic_float10_max_min.c b/runtime/test/atomic/kmp_atomic_float10_max_min.c
 index 72ba1ee..6656911 100644
---- a/openmp/runtime/test/atomic/kmp_atomic_float10_max_min.c
-+++ b/openmp/runtime/test/atomic/kmp_atomic_float10_max_min.c
+--- a/runtime/test/atomic/kmp_atomic_float10_max_min.c
++++ b/runtime/test/atomic/kmp_atomic_float10_max_min.c
 @@ -28,7 +28,7 @@ extern long double __kmpc_atomic_float10_min_cpt(ident_t *id_ref, int gtid,
  
  int main() {
@@ -1578,10 +1601,10 @@ index 72ba1ee..6656911 100644
 +#endif // (KMP_ARCH_X86 || KMP_ARCH_X86_64 || KMP_ARCH_X86_X32) && !defined(_MSC_VER)
    return ret;
  }
-diff --git a/openmp/runtime/test/ompt/callback.h b/openmp/runtime/test/ompt/callback.h
+diff --git a/runtime/test/ompt/callback.h b/runtime/test/ompt/callback.h
 index bc4ce8b..c4e99cd 100644
---- a/openmp/runtime/test/ompt/callback.h
-+++ b/openmp/runtime/test/ompt/callback.h
+--- a/runtime/test/ompt/callback.h
++++ b/runtime/test/ompt/callback.h
 @@ -256,7 +256,7 @@ static void print_ids(int level) {
    define_ompt_label(id)                                                        \
        print_possible_return_addresses(get_ompt_label_address(id))
