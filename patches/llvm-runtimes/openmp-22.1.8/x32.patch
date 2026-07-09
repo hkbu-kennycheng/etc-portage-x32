@@ -703,10 +703,35 @@ index e8ad2a6fd..047e90eeb 100644
  #else
  #define KMP_SIZE_T_MAX (0xFFFFFFFFFFFFFFFF)
 diff --git a/openmp/runtime/src/kmp_platform.h b/openmp/runtime/src/kmp_platform.h
-index 609b7c468..f12e7b433 100644
+index 609b7c468..de6232025 100644
 --- a/openmp/runtime/src/kmp_platform.h
 +++ b/openmp/runtime/src/kmp_platform.h
-@@ -284,7 +284,7 @@
+@@ -117,6 +117,7 @@
+ 
+ #define KMP_ARCH_X86 0
+ #define KMP_ARCH_X86_64 0
++#define KMP_ARCH_X86_X32 0
+ #define KMP_ARCH_AARCH64 0
+ #define KMP_ARCH_AARCH64_32 0
+ #define KMP_ARCH_PPC64_ELFv1 0
+@@ -149,7 +150,10 @@
+ #endif
+ 
+ #if KMP_OS_UNIX
+-#if defined __x86_64
++#if defined(KMP_ARCH_X86_X32) && (KMP_ARCH_X86_X32 == 1)
++#undef KMP_ARCH_X86_X32
++#define KMP_ARCH_X86_X32 1
++#elif defined __x86_64
+ #undef KMP_ARCH_X86_64
+ #define KMP_ARCH_X86_64 1
+ #elif defined __i386
+@@ -280,11 +284,11 @@
+ /* Specify 32 bit architectures here */
+ #define KMP_32_BIT_ARCH                                                        \
+   (KMP_ARCH_X86 || KMP_ARCH_ARM || KMP_ARCH_MIPS || KMP_ARCH_WASM ||           \
+-   KMP_ARCH_PPC || KMP_ARCH_AARCH64_32 || KMP_ARCH_SPARC32)
++   KMP_ARCH_PPC || KMP_ARCH_AARCH64_32 || KMP_ARCH_SPARC32 || KMP_ARCH_X86_X32)
  
  // Platforms which support Intel(R) Many Integrated Core Architecture
  #define KMP_MIC_SUPPORTED                                                      \
