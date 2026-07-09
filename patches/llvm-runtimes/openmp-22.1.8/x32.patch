@@ -1485,12 +1485,54 @@
  // a MOV instruction for non-void runtime functions which is 3 bytes long.
  #define print_possible_return_addresses(addr)                                  \
 
-diff --git runtime/src/kmp_runtime.cpp runtime/src/kmp_runtime.cpp
-index 9a98a4b..d11dcd8 100644
---- runtime/src/kmp_runtime.cpp
-+++ runtime/src/kmp_runtime.cpp
-@@ -8956,7 +8956,7 @@ __kmp_determine_reduction_method(
-        // KMP_OS_HURD || KMP_OS_SOLARIS || KMP_OS_WASI || KMP_OS_AIX
+--- a/openmp/runtime/src/kmp_os.h
++++ b/openmp/runtime/src/kmp_os.h
+@@ -89,7 +89,7 @@
+   #define KMP_HAVE_QUAD 1
+ #endif
+-#endif /* KMP_ARCH_X86 || KMP_ARCH_X86_64 */
++#endif /* KMP_ARCH_X86 || KMP_ARCH_X86_64 || KMP_ARCH_X86_X32 */
+ 
+ #define KMP_USE_X87CONTROL 0
+@@ -181,7 +181,7 @@
+ #if KMP_ARCH_X86 || KMP_ARCH_ARM || KMP_ARCH_MIPS || KMP_ARCH_WASM ||          \
+     KMP_ARCH_PPC || KMP_ARCH_AARCH64_32 || KMP_ARCH_SPARC32
+ #define KMP_SIZE_T_SPEC KMP_UINT32_SPEC
+-#elif KMP_ARCH_X86_64 || KMP_ARCH_PPC64 || KMP_ARCH_AARCH64 ||                 \
++#elif KMP_ARCH_X86_64 || KMP_ARCH_X86_X32 || KMP_ARCH_PPC64 || KMP_ARCH_AARCH64 ||                 \
+     KMP_ARCH_MIPS64 || KMP_ARCH_RISCV64 || KMP_ARCH_LOONGARCH64 ||             \
+     KMP_ARCH_VE || KMP_ARCH_S390X || KMP_ARCH_SPARC64
+ #define KMP_SIZE_T_SPEC KMP_UINT64_SPEC
+@@ -189,7 +189,7 @@
+ #error "Can't determine size_t printf format specifier."
+ #endif
+ 
+-#if KMP_ARCH_X86 || KMP_ARCH_ARM || KMP_ARCH_WASM || KMP_ARCH_PPC
++#if KMP_ARCH_X86 || KMP_ARCH_ARM || KMP_ARCH_WASM || KMP_ARCH_PPC || KMP_ARCH_X86_X32
+ #define KMP_SIZE_T_MAX (0xFFFFFFFF)
+ #else
+ #define KMP_SIZE_T_MAX (0xFFFFFFFFFFFFFFFF)
+--- a/openmp/runtime/src/kmp_affinity.h
++++ b/openmp/runtime/src/kmp_affinity.h
+@@ -201,7 +201,7 @@
+   // must be the same on all systems of the same arch where they are defined, and they cannot change.
+   // stone forever. */
+ #include <sys/syscall.h>
+-#if KMP_ARCH_X86 || KMP_ARCH_ARM
++#if KMP_ARCH_X86 || KMP_ARCH_ARM || KMP_ARCH_X86_X32
+ #ifndef __NR_sched_setaffinity
+ #define __NR_sched_setaffinity 241
+ #elif __NR_sched_setaffinity != 241
+@@ -223,7 +223,7 @@
+ #endif /* __NR_sched_getaffinity */
+-#elif KMP_ARCH_X86_64
++#elif KMP_ARCH_X86_64 || KMP_ARCH_X86_X32
+ #ifndef __NR_sched_setaffinity
+ #define __NR_sched_setaffinity 203
+ #elif __NR_sched_setaffinity != 203
+--- a/openmp/runtime/src/kmp_runtime.cpp
++++ b/openmp/runtime/src/kmp_runtime.cpp
+@@ -8955,7 +8955,7 @@
  
  #elif KMP_ARCH_X86 || KMP_ARCH_ARM || KMP_ARCH_AARCH || KMP_ARCH_MIPS ||       \
 -    KMP_ARCH_WASM || KMP_ARCH_PPC || KMP_ARCH_AARCH64_32 || KMP_ARCH_SPARC
