@@ -1484,3 +1484,86 @@
  // On X86 the NOP instruction is 1 byte long. In addition, the compiler inserts
  // a MOV instruction for non-void runtime functions which is 3 bytes long.
  #define print_possible_return_addresses(addr)                                  \
+
+--- a/openmp/runtime/src/kmp_os.h
++++ b/openmp/runtime/src/kmp_os.h
+@@ -97,7 +97,7 @@
+ /* Check for quad-precision extension. */
+ #define KMP_HAVE_QUAD 0
+-#if KMP_ARCH_X86 || KMP_ARCH_X86_64
++#if KMP_ARCH_X86 || KMP_ARCH_X86_64 || KMP_ARCH_X86_X32
+ #if KMP_COMPILER_ICC || KMP_COMPILER_ICX
+ /* _Quad is already defined for icc */
+ #undef KMP_HAVE_QUAD
+@@ -123,7 +123,7 @@ typedef long double _Quad;
+ #undef KMP_HAVE_QUAD
+ #define KMP_HAVE_QUAD 1
+ #endif
+-#endif /* KMP_ARCH_X86 || KMP_ARCH_X86_64 */
++#endif /* KMP_ARCH_X86 || KMP_ARCH_X86_64 || KMP_ARCH_X86_X32 */
+ 
+ #define KMP_USE_X87CONTROL 0
+@@ -181,7 +181,7 @@ typedef unsigned long long kmp_uint64;
+ #if KMP_ARCH_X86 || KMP_ARCH_ARM || KMP_ARCH_MIPS || KMP_ARCH_WASM ||          \
+     KMP_ARCH_PPC || KMP_ARCH_AARCH64_32 || KMP_ARCH_SPARC32
+ #define KMP_SIZE_T_SPEC KMP_UINT32_SPEC
+-#elif KMP_ARCH_X86_64 || KMP_ARCH_PPC64 || KMP_ARCH_AARCH64 ||                 \
++#elif KMP_ARCH_X86_64 || KMP_ARCH_X86_X32 || KMP_ARCH_PPC64 || KMP_ARCH_AARCH64 ||                 \
+     KMP_ARCH_MIPS64 || KMP_ARCH_RISCV64 || KMP_ARCH_LOONGARCH64 ||             \
+     KMP_ARCH_VE || KMP_ARCH_S390X || KMP_ARCH_SPARC64
+ #define KMP_SIZE_T_SPEC KMP_UINT64_SPEC
+@@ -189,7 +189,7 @@ typedef unsigned long long kmp_uint64;
+ #error "Can't determine size_t printf format specifier."
+ #endif
+ 
+-#if KMP_ARCH_X86 || KMP_ARCH_ARM || KMP_ARCH_WASM || KMP_ARCH_PPC
++#if KMP_ARCH_X86 || KMP_ARCH_ARM || KMP_ARCH_WASM || KMP_ARCH_PPC || KMP_ARCH_X86_X32
+ #define KMP_SIZE_T_MAX (0xFFFFFFFF)
+ #else
+ #define KMP_SIZE_T_MAX (0xFFFFFFFFFFFFFFFF)
+@@ -218,7 +218,7 @@ namespace __kmp {
+  * this system call number from the kernel.
+  */
+ 
+-#if KMP_ARCH_X86 || KMP_ARCH_ARM
++#if KMP_ARCH_X86 || KMP_ARCH_ARM || KMP_ARCH_X86_X32
+ #ifndef __NR_sched_setaffinity
+ #define __NR_sched_setaffinity 241
+ #elif __NR_sched_setaffinity != 241
+@@ -223,7 +223,7 @@ namespace __kmp {
+ #endif /* __NR_sched_getaffinity */
+-#elif KMP_ARCH_X86_64
++#elif KMP_ARCH_X86_64 || KMP_ARCH_X86_X32
+ #ifndef __NR_sched_setaffinity
+ #define __NR_sched_setaffinity 203
+ #elif __NR_sched_setaffinity != 203
+@@ -302,10 +302,10 @@ namespace __kmp {
+ // All mwait code tests for UMWAIT first, so it should only fall back to ring3
+ // MWAIT for KNL.
+ #define KMP_HAVE_MWAIT                                                         \
+-  ((KMP_ARCH_X86 || KMP_ARCH_X86_64) && (KMP_OS_LINUX || KMP_OS_WINDOWS) &&    \
++  ((KMP_ARCH_X86 || KMP_ARCH_X86_64 || KMP_ARCH_X86_X32) && (KMP_OS_LINUX || KMP_OS_WINDOWS) &&    \
+    !KMP_MIC2)
+ #define KMP_HAVE_UMWAIT                                                        \
+-  ((KMP_ARCH_X86 || KMP_ARCH_X86_64) && (KMP_OS_LINUX || KMP_OS_WINDOWS) &&    \
++  ((KMP_ARCH_X86 || KMP_ARCH_X86_64 || KMP_ARCH_X86_X32) && (KMP_OS_LINUX || KMP_OS_WINDOWS) &&    \
+    !KMP_MIC)
+ 
+ #if KMP_OS_WINDOWS
+@@ -719,7 +719,7 @@ extern kmp_real64 __kmp_xchg_real64(volatile kmp_real64 *p, kmp_real64 v);
+ #define KMP_XCHG_REAL64(p, v) __kmp_xchg_real64((p), (v));
+ #endif
+ 
+-#elif (KMP_ASM_INTRINS && KMP_OS_UNIX) || !(KMP_ARCH_X86 || KMP_ARCH_X86_64)
++#elif (KMP_ASM_INTRINS && KMP_OS_UNIX) || !(KMP_ARCH_X86 || KMP_ARCH_X86_64 || KMP_ARCH_X86_X32)
+ 
+ /* cast p to correct type so that proper intrinsic will be used */
+ #define KMP_TEST_THEN_INC32(p)                                                 \
+@@ -8955,7 +8955,7 @@ typedef void (*microtask_t)(int *gtid, int *npr, ...);
+ 
+ #elif KMP_ARCH_X86 || KMP_ARCH_ARM || KMP_ARCH_AARCH || KMP_ARCH_MIPS ||       \
+-    KMP_ARCH_WASM || KMP_ARCH_PPC || KMP_ARCH_AARCH64_32 || KMP_ARCH_SPARC
++    KMP_ARCH_WASM || KMP_ARCH_PPC || KMP_ARCH_AARCH64_32 || KMP_ARCH_SPARC || KMP_ARCH_X86_X32
+ 
+ #if KMP_OS_LINUX || KMP_OS_DRAGONFLY || KMP_OS_FREEBSD || KMP_OS_NETBSD ||     \
+     KMP_OS_OPENBSD || KMP_OS_WINDOWS || KMP_OS_HAIKU || KMP_OS_HURD ||         \
