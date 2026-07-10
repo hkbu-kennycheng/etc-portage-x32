@@ -1,8 +1,7 @@
-diff --git a/openmp/cmake/modules/LibompHandleFlags.cmake b/openmp/cmake/modules/LibompHandleFlags.cmake
-index 77ccb3eca..c01bf1f66 100644
---- a/openmp/cmake/modules/LibompHandleFlags.cmake
-+++ b/openmp/cmake/modules/LibompHandleFlags.cmake
-@@ -60,13 +60,17 @@ function(libomp_get_cxxflags cxxflags)
+diff -ruN openmp.orig/cmake/modules/LibompHandleFlags.cmake openmp/cmake/modules/LibompHandleFlags.cmake
+--- openmp.orig/cmake/modules/LibompHandleFlags.cmake	2026-07-11 00:20:53.677728792 +0800
++++ openmp/cmake/modules/LibompHandleFlags.cmake	2026-07-10 18:57:05.982362654 +0800
+@@ -60,13 +60,17 @@
      libomp_append(flags_local -Qinline-min-size=1 LIBOMP_HAVE_INLINE_MIN_SIZE_FLAG)
    endif()
    # Architectural C and C++ flags
@@ -21,7 +20,7 @@ index 77ccb3eca..c01bf1f66 100644
    elseif(${MIC})
      libomp_append(flags_local -mmic LIBOMP_HAVE_MMIC_FLAG)
      libomp_append(flags_local -ftls-model=initial-exec LIBOMP_HAVE_FTLS_MODEL_FLAG)
-@@ -81,12 +85,16 @@ endfunction()
+@@ -81,12 +85,16 @@
  function(libomp_get_asmflags asmflags)
    set(asmflags_local)
    # Architectural assembler flags
@@ -39,7 +38,7 @@ index 77ccb3eca..c01bf1f66 100644
    elseif(${MIC})
      libomp_append(asmflags_local -mmic LIBOMP_HAVE_MMIC_FLAG)
    endif()
-@@ -117,11 +125,15 @@ function(libomp_get_ldflags ldflags)
+@@ -117,11 +125,15 @@
    libomp_append(ldflags_local -static-intel LIBOMP_HAVE_STATIC_INTEL_FLAG)
    libomp_append(ldflags_local /SAFESEH LIBOMP_HAVE_SAFESEH_FLAG)
    # Architectural linker flags
@@ -56,11 +55,10 @@ index 77ccb3eca..c01bf1f66 100644
    elseif(${MIC})
      libomp_append(ldflags_local -mmic LIBOMP_HAVE_MMIC_FLAG)
      libomp_append(ldflags_local -Wl,-x LIBOMP_HAVE_X_FLAG)
-diff --git a/openmp/runtime/CMakeLists.txt b/openmp/runtime/CMakeLists.txt
-index 9332ca301..9df739e34 100644
---- a/openmp/runtime/CMakeLists.txt
-+++ b/openmp/runtime/CMakeLists.txt
-@@ -91,7 +91,7 @@ if(LIBOMP_ARCH STREQUAL "aarch64")
+diff -ruN openmp.orig/runtime/CMakeLists.txt openmp/runtime/CMakeLists.txt
+--- openmp.orig/runtime/CMakeLists.txt	2026-07-11 00:20:53.685128416 +0800
++++ openmp/runtime/CMakeLists.txt	2026-07-10 18:56:17.326610875 +0800
+@@ -91,7 +91,7 @@
    endif()
  endif()
  
@@ -69,7 +67,7 @@ index 9332ca301..9df739e34 100644
  
  set(LIBOMP_LIB_TYPE normal CACHE STRING
    "Performance,Profiling,Stubs library (normal/profile/stubs)")
-@@ -168,6 +168,7 @@ set(LIBOMP_HWLOC_INSTALL_DIR /usr/local CACHE PATH
+@@ -168,6 +168,7 @@
  # Architecture
  set(IA32 FALSE)
  set(INTEL64 FALSE)
@@ -77,11 +75,19 @@ index 9332ca301..9df739e34 100644
  set(ARM FALSE)
  set(AARCH64 FALSE)
  set(AARCH64_32 FALSE)
-diff --git a/openmp/runtime/cmake/LibompDefinitions.cmake b/openmp/runtime/cmake/LibompDefinitions.cmake
-index c85e15323..670786704 100644
---- a/openmp/runtime/cmake/LibompDefinitions.cmake
-+++ b/openmp/runtime/cmake/LibompDefinitions.cmake
-@@ -32,6 +32,12 @@ function(libomp_get_definitions_flags cppflags)
+@@ -190,6 +191,8 @@
+   set(IA32 TRUE)
+ elseif("${LIBOMP_ARCH}" STREQUAL "x86_64" OR "${LIBOMP_ARCH}" STREQUAL "32e") # Intel(R) 64 architecture
+   set(INTEL64 TRUE)
++elseif("${LIBOMP_ARCH}" STREQUAL "x86_64_x32") # x32 ABI (ILP32)
++  set(X32 TRUE)
+ elseif("${LIBOMP_ARCH}" STREQUAL "arm") # ARM architecture
+   set(ARM TRUE)
+ elseif("${LIBOMP_ARCH}" STREQUAL "ppc") # PPC32 architecture
+diff -ruN openmp.orig/runtime/cmake/LibompDefinitions.cmake openmp/runtime/cmake/LibompDefinitions.cmake
+--- openmp.orig/runtime/cmake/LibompDefinitions.cmake	2026-07-11 00:20:53.685210065 +0800
++++ openmp/runtime/cmake/LibompDefinitions.cmake	2026-07-10 18:57:24.418698159 +0800
+@@ -32,6 +32,12 @@
      libomp_append(cppflags_local "-D LIBOMP_HAVE_PTHREAD_SET_NAME_NP" LIBOMP_HAVE_PTHREAD_SET_NAME_NP)
    endif()
  
@@ -94,11 +100,10 @@ index c85e15323..670786704 100644
    # CMake doesn't include CPPFLAGS from environment, but we will.
    set(${cppflags} ${cppflags_local} ${LIBOMP_CPPFLAGS} $ENV{CPPFLAGS} PARENT_SCOPE)
  endfunction()
-diff --git a/openmp/runtime/cmake/LibompGetArchitecture.cmake b/openmp/runtime/cmake/LibompGetArchitecture.cmake
-index 81aa700e3..667a714c1 100644
---- a/openmp/runtime/cmake/LibompGetArchitecture.cmake
-+++ b/openmp/runtime/cmake/LibompGetArchitecture.cmake
-@@ -18,7 +18,11 @@ function(libomp_get_architecture return_arch)
+diff -ruN openmp.orig/runtime/cmake/LibompGetArchitecture.cmake openmp/runtime/cmake/LibompGetArchitecture.cmake
+--- openmp.orig/runtime/cmake/LibompGetArchitecture.cmake	2026-07-11 00:20:53.685327841 +0800
++++ openmp/runtime/cmake/LibompGetArchitecture.cmake	2026-07-10 18:57:42.218386292 +0800
+@@ -18,7 +18,11 @@
      #if defined(__KNC__)
        #error ARCHITECTURE=mic
      #elif defined(__amd64__) || defined(__amd64) || defined(__x86_64__) || defined(__x86_64) || defined(_M_X64) || defined(_M_AMD64)
@@ -110,11 +115,35 @@ index 81aa700e3..667a714c1 100644
      #elif defined(__i386) || defined(__i386__) || defined(__IA32__) || defined(_M_I86) || defined(_M_IX86) || defined(__X86__) || defined(_X86_)
        #error ARCHITECTURE=i386
      #elif defined(__ARM_ARCH_7__) || defined(__ARM_ARCH_7R__) ||  defined(__ARM_ARCH_7A__) || defined(__ARM_ARCH_7M__)  || defined(__ARM_ARCH_7S__)
-diff --git a/openmp/runtime/cmake/config-ix.cmake b/openmp/runtime/cmake/config-ix.cmake
-index 150a0c3c7..f99e3ea7e 100644
---- a/openmp/runtime/cmake/config-ix.cmake
-+++ b/openmp/runtime/cmake/config-ix.cmake
-@@ -168,7 +168,7 @@ if (NOT WASM)
+diff -ruN openmp.orig/runtime/cmake/LibompMicroTests.cmake openmp/runtime/cmake/LibompMicroTests.cmake
+--- openmp.orig/runtime/cmake/LibompMicroTests.cmake	2026-07-11 00:20:53.685371213 +0800
++++ openmp/runtime/cmake/LibompMicroTests.cmake	2026-07-10 18:58:58.363802899 +0800
+@@ -74,6 +74,8 @@
+   libomp_append(libomp_test_touch_libs "${CMAKE_THREAD_LIBS_INIT}")
+   if(${IA32})
+     libomp_append(libomp_test_touch_cflags -m32 LIBOMP_HAVE_M32_FLAG)
++  elseif(${X32})
++    libomp_append(libomp_test_touch_cflags -mx32 LIBOMP_HAVE_M32_FLAG)
+   endif()
+   libomp_append(libomp_test_touch_libs ${LIBOMP_OUTPUT_DIRECTORY}/${LIBOMP_LIB_FILE})
+   libomp_append(libomp_test_touch_libs "${LIBOMP_HWLOC_LIBRARY}" LIBOMP_USE_HWLOC)
+@@ -197,6 +199,12 @@
+       libomp_append(libomp_expected_library_deps libc.so.6)
+       libomp_append(libomp_expected_library_deps ld-linux-x86-64.so.2)
+       libomp_append(libomp_expected_library_deps librt.so.1)
++    elseif(${X32})
++      libomp_append(libomp_expected_library_deps libc.so.6)
++      libomp_append(libomp_expected_library_deps ld-linux-x32.so.2)
++      libomp_append(libomp_expected_library_deps libpthread.so.0)
++      libomp_append(libomp_expected_library_deps libm.so.6)
++      libomp_append(libomp_expected_library_deps librt.so.1)
+     elseif(${ARM})
+       libomp_append(libomp_expected_library_deps libc.so.6)
+       libomp_append(libomp_expected_library_deps libffi.so.6)
+diff -ruN openmp.orig/runtime/cmake/config-ix.cmake openmp/runtime/cmake/config-ix.cmake
+--- openmp.orig/runtime/cmake/config-ix.cmake	2026-07-11 00:20:53.685412628 +0800
++++ openmp/runtime/cmake/config-ix.cmake	2026-07-10 18:58:27.280963719 +0800
+@@ -168,7 +168,7 @@
  endif()
  
  # Checking for x86-specific waitpkg and rtm attribute and intrinsics
@@ -123,7 +152,7 @@ index 150a0c3c7..f99e3ea7e 100644
    check_include_file(immintrin.h LIBOMP_HAVE_IMMINTRIN_H)
    if (NOT LIBOMP_HAVE_IMMINTRIN_H)
      check_include_file(intrin.h LIBOMP_HAVE_INTRIN_H)
-@@ -246,7 +246,7 @@ else()
+@@ -246,7 +246,7 @@
  endif()
  
  # Check if adaptive locks are available
@@ -132,10 +161,17 @@ index 150a0c3c7..f99e3ea7e 100644
    set(LIBOMP_HAVE_ADAPTIVE_LOCKS TRUE)
  else()
    set(LIBOMP_HAVE_ADAPTIVE_LOCKS FALSE)
-diff --git a/openmp/runtime/src/kmp.h b/openmp/runtime/src/kmp.h
-index 36c40abaf..d1537a2a3 100644
---- a/openmp/runtime/src/kmp.h
-+++ b/openmp/runtime/src/kmp.h
+@@ -304,6 +304,7 @@
+   if( # hardware architecture supported?
+      ((LIBOMP_ARCH STREQUAL x86_64) OR
+       (LIBOMP_ARCH STREQUAL i386) OR
++      (LIBOMP_ARCH STREQUAL x86_64_x32) OR
+ #      (LIBOMP_ARCH STREQUAL arm) OR
+       (LIBOMP_ARCH STREQUAL aarch64) OR
+       (LIBOMP_ARCH STREQUAL aarch64_32) OR
+diff -ruN openmp.orig/runtime/src/kmp.h openmp/runtime/src/kmp.h
+--- openmp.orig/runtime/src/kmp.h	2026-07-11 00:20:53.686655840 +0800
++++ openmp/runtime/src/kmp.h	2026-07-11 00:00:07.027401788 +0800
 @@ -29,7 +29,7 @@
  #endif
  #define KMP_WEIGHTED_ITERATIONS_SUPPORTED                                      \
@@ -145,7 +181,7 @@ index 36c40abaf..d1537a2a3 100644
  
  #define TASK_CURRENT_NOT_QUEUED 0
  #define TASK_CURRENT_QUEUED 1
-@@ -108,7 +108,7 @@ class kmp_stats_list;
+@@ -108,7 +108,7 @@
  #define KMP_HWLOC_ENABLED 0
  #endif
  
@@ -154,7 +190,7 @@ index 36c40abaf..d1537a2a3 100644
  #include <xmmintrin.h>
  #endif
  
-@@ -523,7 +523,7 @@ extern kmp_nested_nthreads_t __kmp_nested_nth;
+@@ -523,7 +523,7 @@
  #define KMP_FAST_REDUCTION_BARRIER 1
  
  #undef KMP_FAST_REDUCTION_CORE_DUO
@@ -163,7 +199,7 @@ index 36c40abaf..d1537a2a3 100644
  #define KMP_FAST_REDUCTION_CORE_DUO 1
  #endif
  
-@@ -620,7 +620,7 @@ enum kmp_hw_t : int {
+@@ -620,7 +620,7 @@
  
  typedef enum kmp_hw_core_type_t {
    KMP_HW_CORE_TYPE_UNKNOWN = 0x0,
@@ -172,7 +208,7 @@ index 36c40abaf..d1537a2a3 100644
    KMP_HW_CORE_TYPE_ATOM = 0x20,
    KMP_HW_CORE_TYPE_CORE = 0x40,
    KMP_HW_MAX_NUM_CORE_TYPES = 3,
-@@ -849,11 +849,11 @@ enum affinity_type {
+@@ -849,7 +849,7 @@
  
  enum affinity_top_method {
    affinity_top_method_all = 0, // try all (supported) methods, in order
@@ -181,12 +217,17 @@ index 36c40abaf..d1537a2a3 100644
    affinity_top_method_apicid,
    affinity_top_method_x2apicid,
    affinity_top_method_x2apicid_1f,
--#endif /* KMP_ARCH_X86 || KMP_ARCH_X86_64 */
-+#endif /* KMP_ARCH_X86 || KMP_ARCH_X86_64 || KMP_ARCH_X86_X32 */
-   affinity_top_method_cpuinfo, // KMP_CPUINFO_FILE is usable on Windows* OS, too
- #if KMP_GROUP_AFFINITY
-   affinity_top_method_group,
-@@ -1282,7 +1282,7 @@ extern void __kmp_init_target_task();
+@@ -1224,6 +1224,9 @@
+ #elif KMP_ARCH_X86_64
+ #define KMP_DEFAULT_STKSIZE ((size_t)(4 * 1024 * 1024))
+ #define KMP_BACKUP_STKSIZE ((size_t)(2 * 1024 * 1024))
++#elif KMP_ARCH_X86_X32
++#define KMP_DEFAULT_STKSIZE ((size_t)(4 * 1024 * 1024))
++#define KMP_BACKUP_STKSIZE ((size_t)(2 * 1024 * 1024))
+ #elif KMP_ARCH_VE
+ // Minimum stack size for pthread for VE is 4MB.
+ //   https://www.hpc.nec/documents/veos/en/glibc/Difference_Points_glibc.htm
+@@ -1282,7 +1285,7 @@
  #else
  #define KMP_BLOCKTIME(team, tid)                                               \
    (get__bt_set(team, tid) ? get__blocktime(team, tid) : __kmp_dflt_blocktime)
@@ -195,7 +236,7 @@ index 36c40abaf..d1537a2a3 100644
  // HW TSC is used to reduce overhead (clock tick instead of nanosecond).
  extern kmp_uint64 __kmp_ticks_per_msec;
  extern kmp_uint64 __kmp_ticks_per_usec;
-@@ -1335,7 +1335,7 @@ extern kmp_uint64 __kmp_now_nsec();
+@@ -1335,7 +1338,7 @@
  /* Minimum number of threads before switch to TLS gtid (experimentally
     determined) */
  /* josh TODO: what about OS X* tuning? */
@@ -204,7 +245,7 @@ index 36c40abaf..d1537a2a3 100644
  #define KMP_TLS_GTID_MIN 5
  #else
  #define KMP_TLS_GTID_MIN INT_MAX
-@@ -1403,7 +1403,7 @@ extern kmp_uint64 __kmp_now_nsec();
+@@ -1403,7 +1406,7 @@
  #define KMP_NEXT_WAIT 512U /* susequent number of spin-tests */
  #endif
  
@@ -213,7 +254,7 @@ index 36c40abaf..d1537a2a3 100644
  typedef struct kmp_cpuid {
    kmp_uint32 eax;
    kmp_uint32 ebx;
-@@ -3120,7 +3120,7 @@ typedef int (*launch_t)(int gtid);
+@@ -3120,7 +3123,7 @@
  // t_inline_argv. Historically, we have supported at least 96 bytes. Using a
  // larger value for more space between the primary write/worker read section and
  // read/write by all section seems to buy more performance on EPCC PARALLEL.
@@ -222,7 +263,7 @@ index 36c40abaf..d1537a2a3 100644
  #define KMP_INLINE_ARGV_BYTES                                                  \
    (4 * CACHE_LINE -                                                            \
     ((3 * KMP_PTR_SKIP + 2 * sizeof(int) + 2 * sizeof(kmp_int8) +               \
-@@ -3174,12 +3174,12 @@ typedef struct KMP_ALIGN_CACHE kmp_base_team {
+@@ -3174,7 +3177,7 @@
    ompt_lw_taskteam_t *ompt_serialized_team_info;
  #endif
  
@@ -231,13 +272,7 @@ index 36c40abaf..d1537a2a3 100644
    kmp_int8 t_fp_control_saved;
    kmp_int8 t_pad2b;
    kmp_int16 t_x87_fpu_control_word; // FP control regs
-   kmp_uint32 t_mxcsr;
--#endif /* KMP_ARCH_X86 || KMP_ARCH_X86_64 */
-+#endif /* KMP_ARCH_X86 || KMP_ARCH_X86_64 || KMP_ARCH_X86_X32 */
- 
-   void *t_inline_argv[KMP_INLINE_ARGV_ENTRIES];
- 
-@@ -3205,7 +3205,7 @@ typedef struct KMP_ALIGN_CACHE kmp_base_team {
+@@ -3205,7 +3208,7 @@
    omp_allocator_handle_t t_def_allocator; /* default allocator */
  
  // Read/write by workers as well
@@ -246,7 +281,7 @@ index 36c40abaf..d1537a2a3 100644
    // Using CACHE_LINE=64 reduces memory footprint, but causes a big perf
    // regression of epcc 'parallel' and 'barrier' on fxe256lin01. This extra
    // padding serves to fix the performance of epcc 'parallel' and 'barrier' when
-@@ -3364,7 +3364,7 @@ extern int __kmp_storage_map_verbose; /* True means storage map includes
+@@ -3364,7 +3367,7 @@
                                           placement info */
  extern int __kmp_storage_map_verbose_specified;
  
@@ -255,7 +290,7 @@ index 36c40abaf..d1537a2a3 100644
  extern kmp_cpuinfo_t __kmp_cpuinfo;
  static inline bool __kmp_is_hybrid_cpu() { return __kmp_cpuinfo.flags.hybrid; }
  #elif KMP_OS_DARWIN && KMP_ARCH_AARCH64
-@@ -3529,11 +3529,11 @@ extern KMP_THREAD_LOCAL int __kmp_gtid;
+@@ -3529,7 +3532,7 @@
  #endif
  extern int __kmp_tls_gtid_min; /* #threads below which use sp search for gtid */
  extern int __kmp_foreign_tp; // If true, separate TP var for each foreign thread
@@ -264,12 +299,7 @@ index 36c40abaf..d1537a2a3 100644
  extern int __kmp_inherit_fp_control; // copy fp creg(s) parent->workers at fork
  extern kmp_int16 __kmp_init_x87_fpu_control_word; // init thread's FP ctrl reg
  extern kmp_uint32 __kmp_init_mxcsr; /* init thread's mxscr */
--#endif /* KMP_ARCH_X86 || KMP_ARCH_X86_64 */
-+#endif /* KMP_ARCH_X86 || KMP_ARCH_X86_64 || KMP_ARCH_X86_X32 */
- 
- // max_active_levels for nested parallelism enabled by default via
- // OMP_MAX_ACTIVE_LEVELS, OMP_NESTED, OMP_NUM_THREADS, and OMP_PROC_BIND
-@@ -3901,7 +3901,7 @@ extern void __kmp_check_stack_overlap(kmp_info_t *thr);
+@@ -3901,7 +3904,7 @@
  extern void __kmp_expand_host_name(char *buffer, size_t size);
  extern void __kmp_expand_file_name(char *result, size_t rlen, char *pattern);
  
@@ -278,11 +308,10 @@ index 36c40abaf..d1537a2a3 100644
  extern void
  __kmp_initialize_system_tick(void); /* Initialize timer tick value */
  #endif
-diff --git a/openmp/runtime/src/kmp_affinity.cpp b/openmp/runtime/src/kmp_affinity.cpp
-index 6a0e2910d..3d185e862 100644
---- a/openmp/runtime/src/kmp_affinity.cpp
-+++ b/openmp/runtime/src/kmp_affinity.cpp
-@@ -174,7 +174,7 @@ const char *__kmp_hw_get_core_type_string(kmp_hw_core_type_t type) {
+diff -ruN openmp.orig/runtime/src/kmp_affinity.cpp openmp/runtime/src/kmp_affinity.cpp
+--- openmp.orig/runtime/src/kmp_affinity.cpp	2026-07-11 00:20:53.686851361 +0800
++++ openmp/runtime/src/kmp_affinity.cpp	2026-07-11 00:01:29.863215884 +0800
+@@ -174,7 +174,7 @@
    case KMP_HW_CORE_TYPE_UNKNOWN:
    case KMP_HW_MAX_NUM_CORE_TYPES:
      return "unknown";
@@ -291,7 +320,7 @@ index 6a0e2910d..3d185e862 100644
    case KMP_HW_CORE_TYPE_ATOM:
      return "Intel Atom(R) processor";
    case KMP_HW_CORE_TYPE_CORE:
-@@ -1277,7 +1277,7 @@ bool kmp_topology_t::filter_hw_subset() {
+@@ -1277,7 +1277,7 @@
      case KMP_HW_CORE_TYPE_UNKNOWN:
      case KMP_HW_MAX_NUM_CORE_TYPES:
        return 0;
@@ -300,7 +329,7 @@ index 6a0e2910d..3d185e862 100644
      case KMP_HW_CORE_TYPE_ATOM:
        return 1;
      case KMP_HW_CORE_TYPE_CORE:
-@@ -1866,7 +1866,7 @@ static bool __kmp_affinity_create_hwloc_map(kmp_i18n_id_t *const msg_id) {
+@@ -1866,7 +1866,7 @@
                                    0) == 0) {
          for (unsigned i = 0; i < nr_infos; ++i) {
            if (__kmp_str_match("CoreType", 8, infos[i].name)) {
@@ -309,7 +338,7 @@ index 6a0e2910d..3d185e862 100644
              if (__kmp_str_match("IntelAtom", 9, infos[i].value)) {
                cpukinds[idx].core_type = KMP_HW_CORE_TYPE_ATOM;
                break;
-@@ -2108,7 +2108,7 @@ static bool __kmp_affinity_create_proc_group_map(kmp_i18n_id_t *const msg_id) {
+@@ -2108,7 +2108,7 @@
  }
  #endif /* KMP_GROUP_AFFINITY */
  
@@ -318,16 +347,7 @@ index 6a0e2910d..3d185e862 100644
  
  template <kmp_uint32 LSB, kmp_uint32 MSB>
  static inline unsigned __kmp_extract_bits(kmp_uint32 v) {
-@@ -3063,7 +3063,7 @@ static bool __kmp_affinity_create_x2apicid_map(kmp_i18n_id_t *const msg_id) {
-   __kmp_free(proc_info);
-   return true;
- }
--#endif /* KMP_ARCH_X86 || KMP_ARCH_X86_64 */
-+#endif /* KMP_ARCH_X86 || KMP_ARCH_X86_64 || KMP_ARCH_X86_X32 */
- 
- #define osIdIndex 0
- #define threadIdIndex 1
-@@ -3480,7 +3480,7 @@ static bool __kmp_affinity_create_cpuinfo_map(int *line,
+@@ -3480,7 +3480,7 @@
            goto dup_field;
  #endif
          threadInfo[num_avail][osIdIndex] = val;
@@ -336,7 +356,7 @@ index 6a0e2910d..3d185e862 100644
          char path[256];
          KMP_SNPRINTF(
              path, sizeof(path),
-@@ -4868,7 +4868,7 @@ static bool __kmp_aux_affinity_initialize_topology(kmp_affinity_t &affinity) {
+@@ -4868,7 +4868,7 @@
      }
  #endif // KMP_HWLOC_ENABLED
  
@@ -345,16 +365,7 @@ index 6a0e2910d..3d185e862 100644
      if (!success) {
        success = __kmp_affinity_create_x2apicid_map(&msg_id);
        if (!success && verbose && msg_id != kmp_i18n_null) {
-@@ -4881,7 +4881,7 @@ static bool __kmp_aux_affinity_initialize_topology(kmp_affinity_t &affinity) {
-         KMP_INFORM(AffInfoStr, env_var, __kmp_i18n_catgets(msg_id));
-       }
-     }
--#endif /* KMP_ARCH_X86 || KMP_ARCH_X86_64 */
-+#endif /* KMP_ARCH_X86 || KMP_ARCH_X86_64 || KMP_ARCH_X86_X32 */
- 
- #if KMP_OS_LINUX || KMP_OS_AIX
-     if (!success) {
-@@ -4925,7 +4925,7 @@ static bool __kmp_aux_affinity_initialize_topology(kmp_affinity_t &affinity) {
+@@ -4925,7 +4925,7 @@
    }
  #endif // KMP_HWLOC_ENABLED
  
@@ -363,20 +374,31 @@ index 6a0e2910d..3d185e862 100644
    else if (__kmp_affinity_top_method == affinity_top_method_x2apicid ||
             __kmp_affinity_top_method == affinity_top_method_x2apicid_1f) {
      success = __kmp_affinity_create_x2apicid_map(&msg_id);
-@@ -4940,7 +4940,7 @@ static bool __kmp_aux_affinity_initialize_topology(kmp_affinity_t &affinity) {
-       KMP_FATAL(MsgExiting, __kmp_i18n_catgets(msg_id));
-     }
-   }
--#endif /* KMP_ARCH_X86 || KMP_ARCH_X86_64 */
-+#endif /* KMP_ARCH_X86 || KMP_ARCH_X86_64 || KMP_ARCH_X86_X32 */
- 
-   else if (__kmp_affinity_top_method == affinity_top_method_cpuinfo) {
-     int line = 0;
-diff --git a/openmp/runtime/src/kmp_atomic.cpp b/openmp/runtime/src/kmp_atomic.cpp
-index 261e9f1be..4c4e77237 100644
---- a/openmp/runtime/src/kmp_atomic.cpp
-+++ b/openmp/runtime/src/kmp_atomic.cpp
-@@ -865,7 +865,7 @@ static inline kmp_cmplx128_a16_t operator/(kmp_cmplx128_a16_t &lhs,
+diff -ruN openmp.orig/runtime/src/kmp_affinity.h openmp/runtime/src/kmp_affinity.h
+--- openmp.orig/runtime/src/kmp_affinity.h	2026-07-11 00:20:53.687004710 +0800
++++ openmp/runtime/src/kmp_affinity.h	2026-07-10 23:41:25.710810127 +0800
+@@ -234,6 +234,17 @@
+ #elif __NR_sched_getaffinity != 204
+ #error Wrong code for getaffinity system call.
+ #endif /* __NR_sched_getaffinity */
++#elif KMP_ARCH_X86_X32
++#ifndef __NR_sched_setaffinity
++#define __NR_sched_setaffinity 203
++#elif __NR_sched_setaffinity != 203
++#error Wrong code for setaffinity system call.
++#endif /* __NR_sched_setaffinity */
++#ifndef __NR_sched_getaffinity
++#define __NR_sched_getaffinity 204
++#elif __NR_sched_getaffinity != 204
++#error Wrong code for getaffinity system call.
++#endif /* __NR_sched_getaffinity */
+ #elif KMP_ARCH_PPC64
+ #ifndef __NR_sched_setaffinity
+ #define __NR_sched_setaffinity 222
+diff -ruN openmp.orig/runtime/src/kmp_atomic.cpp openmp/runtime/src/kmp_atomic.cpp
+--- openmp.orig/runtime/src/kmp_atomic.cpp	2026-07-11 00:20:53.687230256 +0800
++++ openmp/runtime/src/kmp_atomic.cpp	2026-07-11 00:04:57.677817499 +0800
+@@ -865,7 +865,7 @@
  
  #endif // KMP_OS_WINDOWS && (KMP_ARCH_AARCH64 || KMP_ARCH_ARM)
  
@@ -385,16 +407,7 @@ index 261e9f1be..4c4e77237 100644
  
  // ------------------------------------------------------------------------
  // X86 or X86_64: no alignment problems ====================================
-@@ -941,7 +941,7 @@ static inline kmp_cmplx128_a16_t operator/(kmp_cmplx128_a16_t &lhs,
-   }
- // end of the second part of the workaround for C78287
- #endif // USE_CMPXCHG_FIX
--#endif /* KMP_ARCH_X86 || KMP_ARCH_X86_64 */
-+#endif /* KMP_ARCH_X86 || KMP_ARCH_X86_64 || KMP_ARCH_X86_X32 */
- 
- // Routines for ATOMIC 4-byte operands addition and subtraction
- ATOMIC_FIXED_ADD(fixed4, add, kmp_int32, 32, +, 4i, 3,
-@@ -1082,7 +1082,7 @@ ATOMIC_CMPXCHG(float8, mul, kmp_real64, 64, *, 8r, 7,
+@@ -1082,7 +1082,7 @@
    OP_CRITICAL(= *lhs OP, LCK_ID)                                               \
    }
  
@@ -403,16 +416,7 @@ index 261e9f1be..4c4e77237 100644
  
  // ------------------------------------------------------------------------
  // X86 or X86_64: no alignment problems ===================================
-@@ -1105,7 +1105,7 @@ ATOMIC_CMPXCHG(float8, mul, kmp_real64, 64, *, 8r, 7,
-     OP_CRITICAL(= *lhs OP, LCK_ID) /* unaligned - use critical */              \
-   }                                                                            \
-   }
--#endif /* KMP_ARCH_X86 || KMP_ARCH_X86_64 */
-+#endif /* KMP_ARCH_X86 || KMP_ARCH_X86_64 || KMP_ARCH_X86_X32 */
- 
- ATOMIC_CMPX_L(fixed1, andl, char, 8, &&, 1i, 0,
-               KMP_ARCH_X86) // __kmpc_atomic_fixed1_andl
-@@ -1180,7 +1180,7 @@ ATOMIC_CMPX_L(fixed8, orl, kmp_int64, 64, ||, 8i, 7,
+@@ -1180,7 +1180,7 @@
    }                                                                            \
    }
  
@@ -421,16 +425,7 @@ index 261e9f1be..4c4e77237 100644
  
  // -------------------------------------------------------------------------
  // X86 or X86_64: no alignment problems ====================================
-@@ -1209,7 +1209,7 @@ ATOMIC_CMPX_L(fixed8, orl, kmp_int64, 64, ||, 8i, 7,
-     }                                                                          \
-   }                                                                            \
-   }
--#endif /* KMP_ARCH_X86 || KMP_ARCH_X86_64 */
-+#endif /* KMP_ARCH_X86 || KMP_ARCH_X86_64 || KMP_ARCH_X86_X32 */
- 
- MIN_MAX_COMPXCHG(fixed1, max, char, 8, <, 1i, 0,
-                  KMP_ARCH_X86) // __kmpc_atomic_fixed1_max
-@@ -1235,12 +1235,12 @@ MIN_MAX_COMPXCHG(float8, max, kmp_real64, 64, <, 8r, 7,
+@@ -1235,7 +1235,7 @@
                   KMP_ARCH_X86) // __kmpc_atomic_float8_max
  MIN_MAX_COMPXCHG(float8, min, kmp_real64, 64, >, 8r, 7,
                   KMP_ARCH_X86) // __kmpc_atomic_float8_min
@@ -439,13 +434,7 @@ index 261e9f1be..4c4e77237 100644
  MIN_MAX_CRITICAL(float10, max, long double, <, 10r,
                   1) // __kmpc_atomic_float10_max
  MIN_MAX_CRITICAL(float10, min, long double, >, 10r,
-                  1) // __kmpc_atomic_float10_min
--#endif // KMP_ARCH_X86 || KMP_ARCH_X86_64
-+#endif // KMP_ARCH_X86 || KMP_ARCH_X86_64 || KMP_ARCH_X86_X32
- #if KMP_HAVE_QUAD
- MIN_MAX_CRITICAL(float16, max, QUAD_LEGACY, <, 16r,
-                  1) // __kmpc_atomic_float16_max
-@@ -1263,7 +1263,7 @@ MIN_MAX_CRITICAL(float16, min_a16, Quad_a16_t, >, 16r,
+@@ -1263,7 +1263,7 @@
    }
  
  // ------------------------------------------------------------------------
@@ -454,16 +443,7 @@ index 261e9f1be..4c4e77237 100644
  // ------------------------------------------------------------------------
  // X86 or X86_64: no alignment problems ===================================
  #define ATOMIC_CMPX_EQV(TYPE_ID, OP_ID, TYPE, BITS, OP, LCK_ID, MASK,          \
-@@ -1287,7 +1287,7 @@ MIN_MAX_CRITICAL(float16, min_a16, Quad_a16_t, >, 16r,
-     OP_CRITICAL(^= (TYPE) ~, LCK_ID) /* unaligned address - use critical */    \
-   }                                                                            \
-   }
--#endif /* KMP_ARCH_X86 || KMP_ARCH_X86_64 */
-+#endif /* KMP_ARCH_X86 || KMP_ARCH_X86_64 || KMP_ARCH_X86_X32 */
- 
- ATOMIC_CMPXCHG(fixed1, neqv, kmp_int8, 8, ^, 1i, 0,
-                KMP_ARCH_X86) // __kmpc_atomic_fixed1_neqv
-@@ -1319,7 +1319,7 @@ ATOMIC_CMPX_EQV(fixed8, eqv, kmp_int64, 64, ^~, 8i, 7,
+@@ -1319,7 +1319,7 @@
    }
  
  /* ------------------------------------------------------------------------- */
@@ -472,16 +452,7 @@ index 261e9f1be..4c4e77237 100644
  // routines for long double type
  ATOMIC_CRITICAL(float10, add, long double, +, 10r,
                  1) // __kmpc_atomic_float10_add
-@@ -1329,7 +1329,7 @@ ATOMIC_CRITICAL(float10, mul, long double, *, 10r,
-                 1) // __kmpc_atomic_float10_mul
- ATOMIC_CRITICAL(float10, div, long double, /, 10r,
-                 1) // __kmpc_atomic_float10_div
--#endif // KMP_ARCH_X86 || KMP_ARCH_X86_64
-+#endif // KMP_ARCH_X86 || KMP_ARCH_X86_64 || KMP_ARCH_X86_X32
- #if KMP_HAVE_QUAD
- // routines for _Quad type
- ATOMIC_CRITICAL(float16, add, QUAD_LEGACY, +, 16r,
-@@ -1375,7 +1375,7 @@ ATOMIC_CRITICAL(cmplx8, add, kmp_cmplx64, +, 16c, 1) // __kmpc_atomic_cmplx8_add
+@@ -1375,7 +1375,7 @@
  ATOMIC_CRITICAL(cmplx8, sub, kmp_cmplx64, -, 16c, 1) // __kmpc_atomic_cmplx8_sub
  ATOMIC_CRITICAL(cmplx8, mul, kmp_cmplx64, *, 16c, 1) // __kmpc_atomic_cmplx8_mul
  ATOMIC_CRITICAL(cmplx8, div, kmp_cmplx64, /, 16c, 1) // __kmpc_atomic_cmplx8_div
@@ -490,16 +461,7 @@ index 261e9f1be..4c4e77237 100644
  ATOMIC_CRITICAL(cmplx10, add, kmp_cmplx80, +, 20c,
                  1) // __kmpc_atomic_cmplx10_add
  ATOMIC_CRITICAL(cmplx10, sub, kmp_cmplx80, -, 20c,
-@@ -1384,7 +1384,7 @@ ATOMIC_CRITICAL(cmplx10, mul, kmp_cmplx80, *, 20c,
-                 1) // __kmpc_atomic_cmplx10_mul
- ATOMIC_CRITICAL(cmplx10, div, kmp_cmplx80, /, 20c,
-                 1) // __kmpc_atomic_cmplx10_div
--#endif // KMP_ARCH_X86 || KMP_ARCH_X86_64
-+#endif // KMP_ARCH_X86 || KMP_ARCH_X86_64 || KMP_ARCH_X86_X32
- #if KMP_HAVE_QUAD
- ATOMIC_CRITICAL(cmplx16, add, CPLX128_LEG, +, 32c,
-                 1) // __kmpc_atomic_cmplx16_add
-@@ -1408,7 +1408,7 @@ ATOMIC_CRITICAL(cmplx16, div_a16, kmp_cmplx128_a16_t, /, 32c,
+@@ -1408,7 +1408,7 @@
  
  // OpenMP 4.0: x = expr binop x for non-commutative operations.
  // Supported only on IA-32 architecture and Intel(R) 64
@@ -508,16 +470,7 @@ index 261e9f1be..4c4e77237 100644
  
  // ------------------------------------------------------------------------
  // Operation on *lhs, rhs bound by critical section
-@@ -1613,7 +1613,7 @@ ATOMIC_CRITICAL_REV(cmplx16, div_a16, kmp_cmplx128_a16_t, /, 32c,
- #endif // KMP_ARCH_X86
- #endif // KMP_HAVE_QUAD
- 
--#endif // KMP_ARCH_X86 || KMP_ARCH_X86_64
-+#endif // KMP_ARCH_X86 || KMP_ARCH_X86_64 || KMP_ARCH_X86_X32
- // End of OpenMP 4.0: x = expr binop x for non-commutative operations.
- 
- /* ------------------------------------------------------------------------ */
-@@ -1644,7 +1644,7 @@ ATOMIC_CRITICAL_REV(cmplx16, div_a16, kmp_cmplx128_a16_t, /, 32c,
+@@ -1644,7 +1644,7 @@
    }
  
  // -------------------------------------------------------------------------
@@ -526,12 +479,8 @@ index 261e9f1be..4c4e77237 100644
  // -------------------------------------------------------------------------
  // X86 or X86_64: no alignment problems ====================================
  #define ATOMIC_CMPXCHG_MIX(TYPE_ID, TYPE, OP_ID, BITS, OP, RTYPE_ID, RTYPE,    \
-@@ -1669,10 +1669,10 @@ ATOMIC_CRITICAL_REV(cmplx16, div_a16, kmp_cmplx128_a16_t, /, 32c,
-                        LCK_ID) /* unaligned address - use critical */          \
-   }                                                                            \
-   }
--#endif /* KMP_ARCH_X86 || KMP_ARCH_X86_64 */
-+#endif /* KMP_ARCH_X86 || KMP_ARCH_X86_64 || KMP_ARCH_X86_X32 */
+@@ -1672,7 +1672,7 @@
+ #endif /* KMP_ARCH_X86 || KMP_ARCH_X86_64 */
  
  // -------------------------------------------------------------------------
 -#if KMP_ARCH_X86 || KMP_ARCH_X86_64
@@ -539,16 +488,7 @@ index 261e9f1be..4c4e77237 100644
  // -------------------------------------------------------------------------
  #define ATOMIC_CMPXCHG_REV_MIX(TYPE_ID, TYPE, OP_ID, BITS, OP, RTYPE_ID,       \
                                 RTYPE, LCK_ID, MASK, GOMP_FLAG)                 \
-@@ -1686,7 +1686,7 @@ ATOMIC_CRITICAL_REV(cmplx16, div_a16, kmp_cmplx128_a16_t, /, 32c,
-   OP_GOMP_CRITICAL_REV(TYPE, OP, GOMP_FLAG)                                    \
-   OP_CRITICAL_REV(TYPE, OP, LCK_ID)                                            \
-   }
--#endif /* KMP_ARCH_X86 || KMP_ARCH_X86_64 */
-+#endif /* KMP_ARCH_X86 || KMP_ARCH_X86_64 || KMP_ARCH_X86_X32 */
- 
- // RHS=float8
- ATOMIC_CMPXCHG_MIX(fixed1, char, mul, 8, *, float8, kmp_real64, 1i, 0,
-@@ -1803,7 +1803,7 @@ ATOMIC_CMPXCHG_MIX(float8, kmp_real64, mul, 64, *, fp, _Quad, 8r, 7,
+@@ -1803,7 +1803,7 @@
  ATOMIC_CMPXCHG_MIX(float8, kmp_real64, div, 64, /, fp, _Quad, 8r, 7,
                     KMP_ARCH_X86) // __kmpc_atomic_float8_div_fp
  
@@ -557,12 +497,7 @@ index 261e9f1be..4c4e77237 100644
  ATOMIC_CRITICAL_FP(float10, long double, add, +, fp, _Quad, 10r,
                     1) // __kmpc_atomic_float10_add_fp
  ATOMIC_CRITICAL_FP(float10, long double, sub, -, fp, _Quad, 10r,
-@@ -1864,11 +1864,11 @@ ATOMIC_CRITICAL_REV_FP(float10, long double, sub_rev, -, fp, _Quad, 10r,
-                        1) // __kmpc_atomic_float10_sub_rev_fp
- ATOMIC_CRITICAL_REV_FP(float10, long double, div_rev, /, fp, _Quad, 10r,
-                        1) // __kmpc_atomic_float10_div_rev_fp
--#endif /* KMP_ARCH_X86 || KMP_ARCH_X86_64 */
-+#endif /* KMP_ARCH_X86 || KMP_ARCH_X86_64 || KMP_ARCH_X86_X32 */
+@@ -1868,7 +1868,7 @@
  
  #endif // KMP_HAVE_QUAD
  
@@ -571,16 +506,7 @@ index 261e9f1be..4c4e77237 100644
  // ------------------------------------------------------------------------
  // X86 or X86_64: no alignment problems ====================================
  #if USE_CMPXCHG_FIX
-@@ -1903,7 +1903,7 @@ ATOMIC_CRITICAL_REV_FP(float10, long double, div_rev, /, fp, _Quad, 10r,
-                        LCK_ID) /* unaligned address - use critical */          \
-   }                                                                            \
-   }
--#endif /* KMP_ARCH_X86 || KMP_ARCH_X86_64 */
-+#endif /* KMP_ARCH_X86 || KMP_ARCH_X86_64 || KMP_ARCH_X86_X32 */
- 
- ATOMIC_CMPXCHG_CMPLX(cmplx4, kmp_cmplx32, add, 64, +, cmplx8, kmp_cmplx64, 8c,
-                      7, KMP_ARCH_X86) // __kmpc_atomic_cmplx4_add_cmplx8
-@@ -2924,7 +2924,7 @@ ATOMIC_CRITICAL_CPT(cmplx16, div_a16_cpt, kmp_cmplx128_a16_t, /, 32c,
+@@ -2924,7 +2924,7 @@
  // binop x; v = x; }  for non-commutative operations.
  // Supported only on IA-32 architecture and Intel(R) 64
  
@@ -589,16 +515,7 @@ index 261e9f1be..4c4e77237 100644
  // -------------------------------------------------------------------------
  // Operation on *lhs, rhs bound by critical section
  //     OP     - operator (it's supposed to contain an assignment)
-@@ -3405,7 +3405,7 @@ ATOMIC_CRITICAL_SWP(cmplx16_a16, kmp_cmplx128_a16_t, 32c,
- 
- // End of OpenMP 4.0 Capture
- 
--#endif // KMP_ARCH_X86 || KMP_ARCH_X86_64
-+#endif // KMP_ARCH_X86 || KMP_ARCH_X86_64 || KMP_ARCH_X86_X32
- 
- #undef OP_CRITICAL
- 
-@@ -3464,7 +3464,7 @@ void __kmpc_atomic_2(ident_t *id_ref, int gtid, void *lhs, void *rhs,
+@@ -3464,7 +3464,7 @@
    if (
  #if KMP_ARCH_X86 && defined(KMP_GOMP_COMPAT)
        FALSE /* must use lock */
@@ -607,7 +524,7 @@ index 261e9f1be..4c4e77237 100644
        TRUE /* no alignment problems */
  #else
        !((kmp_uintptr_t)lhs & 0x1) /* make sure address is 2-byte aligned */
-@@ -3513,11 +3513,11 @@ void __kmpc_atomic_4(ident_t *id_ref, int gtid, void *lhs, void *rhs,
+@@ -3513,7 +3513,7 @@
    if (
  // FIXME: On IA-32 architecture, gcc uses cmpxchg only for 4-byte ints.
  // Gomp compatibility is broken if this routine is called for floats.
@@ -616,12 +533,7 @@ index 261e9f1be..4c4e77237 100644
        TRUE /* no alignment problems */
  #else
        !((kmp_uintptr_t)lhs & 0x3) /* make sure address is 4-byte aligned */
--#endif // KMP_ARCH_X86 || KMP_ARCH_X86_64
-+#endif // KMP_ARCH_X86 || KMP_ARCH_X86_64 || KMP_ARCH_X86_X32
-   ) {
-     kmp_int32 old_value, new_value;
- 
-@@ -3563,7 +3563,7 @@ void __kmpc_atomic_8(ident_t *id_ref, int gtid, void *lhs, void *rhs,
+@@ -3563,7 +3563,7 @@
  
  #if KMP_ARCH_X86 && defined(KMP_GOMP_COMPAT)
        FALSE /* must use lock */
@@ -630,7 +542,7 @@ index 261e9f1be..4c4e77237 100644
        TRUE /* no alignment problems */
  #else
        !((kmp_uintptr_t)lhs & 0x7) /* make sure address is 8-byte aligned */
-@@ -3604,7 +3604,7 @@ void __kmpc_atomic_8(ident_t *id_ref, int gtid, void *lhs, void *rhs,
+@@ -3604,7 +3604,7 @@
        __kmp_release_atomic_lock(&__kmp_atomic_lock_8i, gtid);
    }
  }
@@ -639,16 +551,7 @@ index 261e9f1be..4c4e77237 100644
  void __kmpc_atomic_10(ident_t *id_ref, int gtid, void *lhs, void *rhs,
                        void (*f)(void *, void *, void *)) {
    KMP_DEBUG_ASSERT(__kmp_init_serial);
-@@ -3625,7 +3625,7 @@ void __kmpc_atomic_10(ident_t *id_ref, int gtid, void *lhs, void *rhs,
- #endif /* KMP_GOMP_COMPAT */
-     __kmp_release_atomic_lock(&__kmp_atomic_lock_10r, gtid);
- }
--#endif // KMP_ARCH_X86 || KMP_ARCH_X86_64
-+#endif // KMP_ARCH_X86 || KMP_ARCH_X86_64 || KMP_ARCH_X86_X32
- 
- void __kmpc_atomic_16(ident_t *id_ref, int gtid, void *lhs, void *rhs,
-                       void (*f)(void *, void *, void *)) {
-@@ -3647,7 +3647,7 @@ void __kmpc_atomic_16(ident_t *id_ref, int gtid, void *lhs, void *rhs,
+@@ -3647,7 +3647,7 @@
  #endif /* KMP_GOMP_COMPAT */
      __kmp_release_atomic_lock(&__kmp_atomic_lock_16c, gtid);
  }
@@ -657,16 +560,7 @@ index 261e9f1be..4c4e77237 100644
  void __kmpc_atomic_20(ident_t *id_ref, int gtid, void *lhs, void *rhs,
                        void (*f)(void *, void *, void *)) {
    KMP_DEBUG_ASSERT(__kmp_init_serial);
-@@ -3668,7 +3668,7 @@ void __kmpc_atomic_20(ident_t *id_ref, int gtid, void *lhs, void *rhs,
- #endif /* KMP_GOMP_COMPAT */
-     __kmp_release_atomic_lock(&__kmp_atomic_lock_20c, gtid);
- }
--#endif // KMP_ARCH_X86 || KMP_ARCH_X86_64
-+#endif // KMP_ARCH_X86 || KMP_ARCH_X86_64 || KMP_ARCH_X86_X32
- void __kmpc_atomic_32(ident_t *id_ref, int gtid, void *lhs, void *rhs,
-                       void (*f)(void *, void *, void *)) {
-   KMP_DEBUG_ASSERT(__kmp_init_serial);
-@@ -3705,7 +3705,7 @@ void __kmpc_atomic_end(void) {
+@@ -3705,7 +3705,7 @@
    __kmp_release_atomic_lock(&__kmp_atomic_lock, gtid);
  }
  
@@ -675,20 +569,10 @@ index 261e9f1be..4c4e77237 100644
  
  // OpenMP 5.1 compare and swap
  
-@@ -3868,7 +3868,7 @@ kmp_int64 __kmpc_atomic_val_8_cas_cpt(ident_t *loc, int gtid, kmp_int64 *x,
- }
- 
- // End OpenMP 5.1 compare + capture
--#endif // KMP_ARCH_X86 || KMP_ARCH_X86_64
-+#endif // KMP_ARCH_X86 || KMP_ARCH_X86_64 || KMP_ARCH_X86_X32
- 
- /*!
- @}
-diff --git a/openmp/runtime/src/kmp_atomic.h b/openmp/runtime/src/kmp_atomic.h
-index 4fc51ee42..0c54625e9 100644
---- a/openmp/runtime/src/kmp_atomic.h
-+++ b/openmp/runtime/src/kmp_atomic.h
-@@ -701,7 +701,7 @@ void __kmpc_atomic_cmplx16_div_a16(ident_t *id_ref, int gtid,
+diff -ruN openmp.orig/runtime/src/kmp_atomic.h openmp/runtime/src/kmp_atomic.h
+--- openmp.orig/runtime/src/kmp_atomic.h	2026-07-11 00:20:53.687390345 +0800
++++ openmp/runtime/src/kmp_atomic.h	2026-07-10 19:07:04.648408640 +0800
+@@ -701,7 +701,7 @@
  
  // OpenMP 4.0: x = expr binop x for non-commutative operations.
  // Supported only on IA-32 architecture and Intel(R) 64
@@ -697,16 +581,7 @@ index 4fc51ee42..0c54625e9 100644
  
  void __kmpc_atomic_fixed1_sub_rev(ident_t *id_ref, int gtid, char *lhs,
                                    char rhs);
-@@ -801,7 +801,7 @@ void __kmpc_atomic_cmplx16_div_a16_rev(ident_t *id_ref, int gtid,
- #endif
- #endif // KMP_HAVE_QUAD
- 
--#endif // KMP_ARCH_X86 || KMP_ARCH_X86_64
-+#endif // KMP_ARCH_X86 || KMP_ARCH_X86_64 || KMP_ARCH_X86_X32
- 
- // routines for mixed types
- 
-@@ -1417,7 +1417,7 @@ void __kmpc_atomic_end(void);
+@@ -1417,7 +1417,7 @@
  
  // OpenMP 4.0: v = x = expr binop x; { v = x; x = expr binop x; } { x = expr
  // binop x; v = x; }  for non-commutative operations.
@@ -715,20 +590,10 @@ index 4fc51ee42..0c54625e9 100644
  char __kmpc_atomic_fixed1_sub_cpt_rev(ident_t *id_ref, int gtid, char *lhs,
                                        char rhs, int flag);
  char __kmpc_atomic_fixed1_div_cpt_rev(ident_t *id_ref, int gtid, char *lhs,
-@@ -1842,7 +1842,7 @@ kmp_int64 __kmpc_atomic_val_8_cas_cpt(ident_t *loc, int gtid, kmp_int64 *x,
- 
- // End OpenMP 5.1 compare + capture
- 
--#endif // KMP_ARCH_X86 || KMP_ARCH_X86_64
-+#endif // KMP_ARCH_X86 || KMP_ARCH_X86_64 || KMP_ARCH_X86_X32
- 
- /* ------------------------------------------------------------------------ */
- 
-diff --git a/openmp/runtime/src/kmp_csupport.cpp b/openmp/runtime/src/kmp_csupport.cpp
-index a92fc4637..9dedaacc0 100644
---- a/openmp/runtime/src/kmp_csupport.cpp
-+++ b/openmp/runtime/src/kmp_csupport.cpp
-@@ -711,13 +711,13 @@ void __kmpc_end_serialized_parallel(ident_t *loc, kmp_int32 global_tid) {
+diff -ruN openmp.orig/runtime/src/kmp_csupport.cpp openmp/runtime/src/kmp_csupport.cpp
+--- openmp.orig/runtime/src/kmp_csupport.cpp	2026-07-11 00:20:53.687864528 +0800
++++ openmp/runtime/src/kmp_csupport.cpp	2026-07-11 00:01:50.036344168 +0800
+@@ -711,7 +711,7 @@
  
      /* return to the parallel section */
  
@@ -737,14 +602,7 @@ index a92fc4637..9dedaacc0 100644
      if (__kmp_inherit_fp_control && serial_team->t.t_fp_control_saved) {
        __kmp_clear_x87_fpu_status_word();
        __kmp_load_x87_fpu_control_word(&serial_team->t.t_x87_fpu_control_word);
-       __kmp_load_mxcsr(&serial_team->t.t_mxcsr);
-     }
--#endif /* KMP_ARCH_X86 || KMP_ARCH_X86_64 */
-+#endif /* KMP_ARCH_X86 || KMP_ARCH_X86_64 || KMP_ARCH_X86_X32 */
- 
-     __kmp_pop_current_task_from_thread(this_thr);
- #if OMPD_SUPPORT
-@@ -1444,7 +1444,7 @@ static __forceinline kmp_dyna_lockseq_t __kmp_map_hint_to_lock(uintptr_t hint) {
+@@ -1444,7 +1444,7 @@
  #define KMP_TSX_LOCK(seq) __kmp_user_lock_seq
  #endif
  
@@ -753,7 +611,7 @@ index a92fc4637..9dedaacc0 100644
  #define KMP_CPUINFO_RTM (__kmp_cpuinfo.flags.rtm)
  #else
  #define KMP_CPUINFO_RTM 0
-@@ -3047,7 +3047,7 @@ void __kmpc_unset_lock(ident_t *loc, kmp_int32 gtid, void **user_lock) {
+@@ -3047,7 +3047,7 @@
    if ((__kmp_user_lock_kind == lk_tas) &&
        (sizeof(lck->tas.lk.poll) <= OMP_LOCK_T_SIZE)) {
  #if KMP_OS_LINUX &&                                                            \
@@ -762,7 +620,7 @@ index a92fc4637..9dedaacc0 100644
  // "fast" path implemented to fix customer performance issue
  #if USE_ITT_BUILD
      __kmp_itt_lock_releasing((kmp_user_lock_p)user_lock);
-@@ -3143,7 +3143,7 @@ void __kmpc_unset_nest_lock(ident_t *loc, kmp_int32 gtid, void **user_lock) {
+@@ -3143,7 +3143,7 @@
        (sizeof(lck->tas.lk.poll) + sizeof(lck->tas.lk.depth_locked) <=
         OMP_NEST_LOCK_T_SIZE)) {
  #if KMP_OS_LINUX &&                                                            \
@@ -771,10 +629,9 @@ index a92fc4637..9dedaacc0 100644
      // "fast" path implemented to fix customer performance issue
      kmp_tas_lock_t *tl = (kmp_tas_lock_t *)user_lock;
  #if USE_ITT_BUILD
-diff --git a/openmp/runtime/src/kmp_global.cpp b/openmp/runtime/src/kmp_global.cpp
-index 6c3b576ca..19d50ad55 100644
---- a/openmp/runtime/src/kmp_global.cpp
-+++ b/openmp/runtime/src/kmp_global.cpp
+diff -ruN openmp.orig/runtime/src/kmp_global.cpp openmp/runtime/src/kmp_global.cpp
+--- openmp.orig/runtime/src/kmp_global.cpp	2026-07-11 00:20:53.688761593 +0800
++++ openmp/runtime/src/kmp_global.cpp	2026-07-10 19:07:04.591390211 +0800
 @@ -18,7 +18,7 @@
  
  kmp_key_t __kmp_gtid_threadprivate_key;
@@ -784,7 +641,7 @@ index 6c3b576ca..19d50ad55 100644
  kmp_cpuinfo_t __kmp_cpuinfo = {0}; // Not initialized
  #endif
  
-@@ -185,11 +185,11 @@ KMP_THREAD_LOCAL int __kmp_gtid = KMP_GTID_DNE;
+@@ -185,7 +185,7 @@
  #endif /* KMP_TDATA_GTID */
  int __kmp_tls_gtid_min = INT_MAX;
  int __kmp_foreign_tp = TRUE;
@@ -793,16 +650,27 @@ index 6c3b576ca..19d50ad55 100644
  int __kmp_inherit_fp_control = TRUE;
  kmp_int16 __kmp_init_x87_fpu_control_word = 0;
  kmp_uint32 __kmp_init_mxcsr = 0;
--#endif /* KMP_ARCH_X86 || KMP_ARCH_X86_64 */
-+#endif /* KMP_ARCH_X86 || KMP_ARCH_X86_64 || KMP_ARCH_X86_X32 */
+diff -ruN openmp.orig/runtime/src/kmp_itt.h openmp/runtime/src/kmp_itt.h
+--- openmp.orig/runtime/src/kmp_itt.h	2026-07-11 00:20:53.689114035 +0800
++++ openmp/runtime/src/kmp_itt.h	2026-07-11 00:01:55.069626497 +0800
+@@ -165,11 +165,11 @@
+    therefore uninteresting when collecting traces for architecture simulation.
+  */
+ #ifndef INCLUDE_SSC_MARKS
+-#define INCLUDE_SSC_MARKS (KMP_OS_LINUX && KMP_ARCH_X86_64)
++#define INCLUDE_SSC_MARKS (KMP_OS_LINUX && (KMP_ARCH_X86_64 || KMP_ARCH_X86_X32))
+ #endif
  
- #ifdef USE_LOAD_BALANCE
- double __kmp_load_balance_interval = 1.0;
-diff --git a/openmp/runtime/src/kmp_lock.cpp b/openmp/runtime/src/kmp_lock.cpp
-index fd1300352..c67f021b6 100644
---- a/openmp/runtime/src/kmp_lock.cpp
-+++ b/openmp/runtime/src/kmp_lock.cpp
-@@ -2633,7 +2633,7 @@ static void __kmp_set_drdpa_lock_flags(kmp_drdpa_lock_t *lck,
+ /* Linux 64 only for now */
+-#if (INCLUDE_SSC_MARKS && KMP_OS_LINUX && KMP_ARCH_X86_64)
++#if (INCLUDE_SSC_MARKS && KMP_OS_LINUX && (KMP_ARCH_X86_64 || KMP_ARCH_X86_X32))
+ // Portable (at least for gcc and icc) code to insert the necessary instructions
+ // to set %ebx and execute the unlikely no-op.
+ #if defined(__INTEL_COMPILER)
+diff -ruN openmp.orig/runtime/src/kmp_lock.cpp openmp/runtime/src/kmp_lock.cpp
+--- openmp.orig/runtime/src/kmp_lock.cpp	2026-07-11 00:20:53.689252534 +0800
++++ openmp/runtime/src/kmp_lock.cpp	2026-07-10 19:07:04.655627105 +0800
+@@ -2633,7 +2633,7 @@
  }
  
  // Time stamp counter
@@ -811,11 +679,10 @@ index fd1300352..c67f021b6 100644
  #define __kmp_tsc() __kmp_hardware_timestamp()
  // Runtime's default backoff parameters
  kmp_backoff_t __kmp_spin_backoff_params = {1, 4096, 100};
-diff --git a/openmp/runtime/src/kmp_lock.h b/openmp/runtime/src/kmp_lock.h
-index 6202f3d61..871516366 100644
---- a/openmp/runtime/src/kmp_lock.h
-+++ b/openmp/runtime/src/kmp_lock.h
-@@ -168,7 +168,7 @@ extern void __kmp_destroy_nested_tas_lock(kmp_tas_lock_t *lck);
+diff -ruN openmp.orig/runtime/src/kmp_lock.h openmp/runtime/src/kmp_lock.h
+--- openmp.orig/runtime/src/kmp_lock.h	2026-07-11 00:20:53.689375809 +0800
++++ openmp/runtime/src/kmp_lock.h	2026-07-11 00:00:32.057142368 +0800
+@@ -168,7 +168,7 @@
  #ifndef KMP_USE_FUTEX
  #define KMP_USE_FUTEX                                                          \
    (KMP_OS_LINUX &&                                                             \
@@ -824,25 +691,7 @@ index 6202f3d61..871516366 100644
  #endif
  #if KMP_USE_FUTEX
  
-@@ -638,7 +638,7 @@ extern int (*__kmp_acquire_user_lock_with_checks_)(kmp_user_lock_p lck,
-                                                    kmp_int32 gtid);
- 
- #if KMP_OS_LINUX &&                                                            \
--    (KMP_ARCH_X86 || KMP_ARCH_X86_64 || KMP_ARCH_ARM || KMP_ARCH_AARCH64)
-+    (KMP_ARCH_X86 || KMP_ARCH_X86_64 || KMP_ARCH_X86_X32 || KMP_ARCH_ARM || KMP_ARCH_AARCH64)
- 
- #define __kmp_acquire_user_lock_with_checks(lck, gtid)                         \
-   if (__kmp_user_lock_kind == lk_tas) {                                        \
-@@ -683,7 +683,7 @@ extern int (*__kmp_test_user_lock_with_checks_)(kmp_user_lock_p lck,
-                                                 kmp_int32 gtid);
- 
- #if KMP_OS_LINUX &&                                                            \
--    (KMP_ARCH_X86 || KMP_ARCH_X86_64 || KMP_ARCH_ARM || KMP_ARCH_AARCH64)
-+    (KMP_ARCH_X86 || KMP_ARCH_X86_64 || KMP_ARCH_X86_X32 || KMP_ARCH_ARM || KMP_ARCH_AARCH64)
- 
- #include "kmp_i18n.h" /* AC: KMP_FATAL definition */
- extern int __kmp_env_consistency_check; /* AC: copy from kmp.h here */
-@@ -747,7 +747,7 @@ static inline void __kmp_destroy_user_lock_with_checks(kmp_user_lock_p lck) {
+@@ -747,7 +747,7 @@
  extern int (*__kmp_acquire_nested_user_lock_with_checks_)(kmp_user_lock_p lck,
                                                            kmp_int32 gtid);
  
@@ -851,7 +700,7 @@ index 6202f3d61..871516366 100644
  
  #define __kmp_acquire_nested_user_lock_with_checks(lck, gtid, depth)           \
    if (__kmp_user_lock_kind == lk_tas) {                                        \
-@@ -796,7 +796,7 @@ __kmp_acquire_nested_user_lock_with_checks(kmp_user_lock_p lck, kmp_int32 gtid,
+@@ -796,7 +796,7 @@
  extern int (*__kmp_test_nested_user_lock_with_checks_)(kmp_user_lock_p lck,
                                                         kmp_int32 gtid);
  
@@ -860,20 +709,19 @@ index 6202f3d61..871516366 100644
  static inline int __kmp_test_nested_user_lock_with_checks(kmp_user_lock_p lck,
                                                            kmp_int32 gtid) {
    if (__kmp_user_lock_kind == lk_tas) {
-@@ -1042,7 +1042,7 @@ extern void __kmp_cleanup_user_locks();
+diff -ruN openmp.orig/runtime/src/kmp_os.h openmp/runtime/src/kmp_os.h
+--- openmp.orig/runtime/src/kmp_os.h	2026-07-11 00:20:53.689489479 +0800
++++ openmp/runtime/src/kmp_os.h	2026-07-10 23:47:56.526942983 +0800
+@@ -97,7 +97,7 @@
  
- // Shortcuts
- #define KMP_USE_INLINED_TAS                                                    \
--  (KMP_OS_LINUX && (KMP_ARCH_X86 || KMP_ARCH_X86_64 || KMP_ARCH_ARM)) && 1
-+  (KMP_OS_LINUX && (KMP_ARCH_X86 || KMP_ARCH_X86_64 || KMP_ARCH_X86_X32 || KMP_ARCH_ARM)) && 1
- #define KMP_USE_INLINED_FUTEX KMP_USE_FUTEX && 0
- 
- // List of lock definitions; all nested locks are indirect locks.
-diff --git a/openmp/runtime/src/kmp_os.h b/openmp/runtime/src/kmp_os.h
-index e8ad2a6fd..6c7fbcb60 100644
---- a/openmp/runtime/src/kmp_os.h
-+++ b/openmp/runtime/src/kmp_os.h
-@@ -179,7 +179,7 @@ typedef unsigned long long kmp_uint64;
+ /* Check for quad-precision extension. */
+ #define KMP_HAVE_QUAD 0
+-#if KMP_ARCH_X86 || KMP_ARCH_X86_64
++#if KMP_ARCH_X86 || KMP_ARCH_X86_64 || KMP_ARCH_X86_X32
+ #if KMP_COMPILER_ICC || KMP_COMPILER_ICX
+ /* _Quad is already defined for icc */
+ #undef KMP_HAVE_QUAD
+@@ -179,7 +179,7 @@
  #endif /* KMP_OS_UNIX */
  
  #if KMP_ARCH_X86 || KMP_ARCH_ARM || KMP_ARCH_MIPS || KMP_ARCH_WASM ||          \
@@ -882,7 +730,7 @@ index e8ad2a6fd..6c7fbcb60 100644
  #define KMP_SIZE_T_SPEC KMP_UINT32_SPEC
  #elif KMP_ARCH_X86_64 || KMP_ARCH_PPC64 || KMP_ARCH_AARCH64 ||                 \
      KMP_ARCH_MIPS64 || KMP_ARCH_RISCV64 || KMP_ARCH_LOONGARCH64 ||             \
-@@ -189,7 +189,7 @@ typedef unsigned long long kmp_uint64;
+@@ -189,7 +189,7 @@
  #error "Can't determine size_t printf format specifier."
  #endif
  
@@ -891,11 +739,125 @@ index e8ad2a6fd..6c7fbcb60 100644
  #define KMP_SIZE_T_MAX (0xFFFFFFFF)
  #else
  #define KMP_SIZE_T_MAX (0xFFFFFFFFFFFFFFFF)
-diff --git a/openmp/runtime/src/kmp_platform.h b/openmp/runtime/src/kmp_platform.h
-index 609b7c468..f12e7b433 100644
---- a/openmp/runtime/src/kmp_platform.h
-+++ b/openmp/runtime/src/kmp_platform.h
-@@ -284,7 +284,7 @@
+@@ -218,7 +218,7 @@
+ #define KMP_INT_MIN ((kmp_int32)0x80000000)
+ 
+ // stdarg handling
+-#if (KMP_ARCH_ARM || KMP_ARCH_X86_64 || KMP_ARCH_AARCH64 || KMP_ARCH_WASM) &&  \
++#if (KMP_ARCH_ARM || KMP_ARCH_X86_64 || KMP_ARCH_X86_X32 || KMP_ARCH_AARCH64 || KMP_ARCH_WASM) &&  \
+     (KMP_OS_FREEBSD || KMP_OS_NETBSD || KMP_OS_OPENBSD || KMP_OS_DRAGONFLY ||  \
+      KMP_OS_LINUX || KMP_OS_WASI)
+ typedef va_list *kmp_va_list;
+@@ -302,10 +302,10 @@
+ // All mwait code tests for UMWAIT first, so it should only fall back to ring3
+ // MWAIT for KNL.
+ #define KMP_HAVE_MWAIT                                                         \
+-  ((KMP_ARCH_X86 || KMP_ARCH_X86_64) && (KMP_OS_LINUX || KMP_OS_WINDOWS) &&    \
++  ((KMP_ARCH_X86 || KMP_ARCH_X86_64 || KMP_ARCH_X86_X32) && (KMP_OS_LINUX || KMP_OS_WINDOWS) &&    \
+    !KMP_MIC2)
+ #define KMP_HAVE_UMWAIT                                                        \
+-  ((KMP_ARCH_X86 || KMP_ARCH_X86_64) && (KMP_OS_LINUX || KMP_OS_WINDOWS) &&    \
++  ((KMP_ARCH_X86 || KMP_ARCH_X86_64 || KMP_ARCH_X86_X32) && (KMP_OS_LINUX || KMP_OS_WINDOWS) &&    \
+    !KMP_MIC)
+ 
+ #if KMP_OS_WINDOWS
+@@ -719,7 +719,7 @@
+ #define KMP_XCHG_REAL64(p, v) __kmp_xchg_real64((p), (v));
+ #endif
+ 
+-#elif (KMP_ASM_INTRINS && KMP_OS_UNIX) || !(KMP_ARCH_X86 || KMP_ARCH_X86_64)
++#elif (KMP_ASM_INTRINS && KMP_OS_UNIX) || !(KMP_ARCH_X86 || KMP_ARCH_X86_64 || KMP_ARCH_X86_X32)
+ 
+ /* cast p to correct type so that proper intrinsic will be used */
+ #define KMP_TEST_THEN_INC32(p)                                                 \
+@@ -1066,7 +1066,7 @@
+ #define KMP_MB() /* nothing to do */
+ #endif
+ 
+-#if KMP_ARCH_X86 || KMP_ARCH_X86_64
++#if KMP_ARCH_X86 || KMP_ARCH_X86_64 || KMP_ARCH_X86_X32
+ #if KMP_MIC
+ // fence-style instructions do not exist, but lock; xaddl $0,(%rsp) can be used.
+ // We shouldn't need it, though, since the ABI rules require that
+@@ -1200,7 +1200,7 @@
+ 
+ /* Workaround for Intel(R) 64 code gen bug when taking address of static array
+  * (Intel(R) 64 Tracker #138) */
+-#if (KMP_ARCH_X86_64 || KMP_ARCH_PPC64) && KMP_OS_LINUX
++#if (KMP_ARCH_X86_64 || KMP_ARCH_X86_X32 || KMP_ARCH_PPC64) && KMP_OS_LINUX
+ #define STATIC_EFI2_WORKAROUND
+ #else
+ #define STATIC_EFI2_WORKAROUND static
+@@ -1223,7 +1223,7 @@
+ // dynamic user lock is turned on
+ #if KMP_USE_DYNAMIC_LOCK
+ // Visual studio can't handle the asm sections in this code
+-#define KMP_USE_TSX (KMP_ARCH_X86 || KMP_ARCH_X86_64) && !KMP_COMPILER_MSVC
++#define KMP_USE_TSX (KMP_ARCH_X86 || KMP_ARCH_X86_64 || KMP_ARCH_X86_X32) && !KMP_COMPILER_MSVC
+ #ifdef KMP_USE_ADAPTIVE_LOCKS
+ #undef KMP_USE_ADAPTIVE_LOCKS
+ #endif
+@@ -1233,7 +1233,7 @@
+ // Enable tick time conversion of ticks to seconds
+ #if KMP_STATS_ENABLED
+ #define KMP_HAVE_TICK_TIME                                                     \
+-  (KMP_OS_LINUX && (KMP_MIC || KMP_ARCH_X86 || KMP_ARCH_X86_64))
++  (KMP_OS_LINUX && (KMP_MIC || KMP_ARCH_X86 || KMP_ARCH_X86_64 || KMP_ARCH_X86_X32))
+ #endif
+ 
+ // Warning levels
+diff -ruN openmp.orig/runtime/src/kmp_platform.h openmp/runtime/src/kmp_platform.h
+--- openmp.orig/runtime/src/kmp_platform.h	2026-07-11 00:20:53.689545674 +0800
++++ openmp/runtime/src/kmp_platform.h	2026-07-10 23:21:48.685374837 +0800
+@@ -117,6 +117,7 @@
+ 
+ #define KMP_ARCH_X86 0
+ #define KMP_ARCH_X86_64 0
++#define KMP_ARCH_X86_X32 0
+ #define KMP_ARCH_AARCH64 0
+ #define KMP_ARCH_AARCH64_32 0
+ #define KMP_ARCH_PPC64_ELFv1 0
+@@ -134,8 +135,13 @@
+ 
+ #if KMP_OS_WINDOWS
+ #if defined(_M_AMD64) || defined(__x86_64)
++#if defined(__ILP32__)
++#undef KMP_ARCH_X86_X32
++#define KMP_ARCH_X86_X32 1
++#else
+ #undef KMP_ARCH_X86_64
+ #define KMP_ARCH_X86_64 1
++#endif
+ #elif defined(__aarch64__) || defined(_M_ARM64)
+ #undef KMP_ARCH_AARCH64
+ #define KMP_ARCH_AARCH64 1
+@@ -149,12 +155,18 @@
+ #endif
+ 
+ #if KMP_OS_UNIX
+-#if defined __x86_64
++#if defined(__ILP32__)
++#undef KMP_ARCH_X86_X32
++#define KMP_ARCH_X86_X32 1
++#elif defined __x86_64
+ #undef KMP_ARCH_X86_64
+ #define KMP_ARCH_X86_64 1
+ #elif defined __i386
+ #undef KMP_ARCH_X86
+ #define KMP_ARCH_X86 1
++#elif defined(__x86_64_x32__) || defined(__x86_64_x32)
++#undef KMP_ARCH_X86_X32
++#define KMP_ARCH_X86_X32 1
+ #elif defined __powerpc64__
+ #if defined(_CALL_ELF)
+ #if _CALL_ELF == 2
+@@ -279,15 +291,15 @@
+ 
+ /* Specify 32 bit architectures here */
+ #define KMP_32_BIT_ARCH                                                        \
+-  (KMP_ARCH_X86 || KMP_ARCH_ARM || KMP_ARCH_MIPS || KMP_ARCH_WASM ||           \
++  (KMP_ARCH_X86 || KMP_ARCH_X86_X32 || KMP_ARCH_ARM || KMP_ARCH_MIPS || KMP_ARCH_WASM ||           \
+    KMP_ARCH_PPC || KMP_ARCH_AARCH64_32 || KMP_ARCH_SPARC32)
  
  // Platforms which support Intel(R) Many Integrated Core Architecture
  #define KMP_MIC_SUPPORTED                                                      \
@@ -903,12 +865,15 @@ index 609b7c468..f12e7b433 100644
 +  ((KMP_ARCH_X86 || KMP_ARCH_X86_64 || KMP_ARCH_X86_X32) && (KMP_OS_LINUX || KMP_OS_WINDOWS))
  
  // TODO: Fixme - This is clever, but really fugly
- #if (1 != KMP_ARCH_X86 + KMP_ARCH_X86_64 + KMP_ARCH_ARM + KMP_ARCH_PPC64 +     \
-diff --git a/openmp/runtime/src/kmp_runtime.cpp b/openmp/runtime/src/kmp_runtime.cpp
-index 48e29c9f9..9a98a4ba9 100644
---- a/openmp/runtime/src/kmp_runtime.cpp
-+++ b/openmp/runtime/src/kmp_runtime.cpp
-@@ -1113,7 +1113,7 @@ static void __kmp_fork_team_threads(kmp_root_t *root, kmp_team_t *team,
+-#if (1 != KMP_ARCH_X86 + KMP_ARCH_X86_64 + KMP_ARCH_ARM + KMP_ARCH_PPC64 +     \
++#if (1 != KMP_ARCH_X86 + KMP_ARCH_X86_64 + KMP_ARCH_X86_X32 + KMP_ARCH_ARM + KMP_ARCH_PPC64 +     \
+               KMP_ARCH_AARCH64 + KMP_ARCH_MIPS + KMP_ARCH_MIPS64 +             \
+               KMP_ARCH_RISCV64 + KMP_ARCH_LOONGARCH64 + KMP_ARCH_VE +          \
+               KMP_ARCH_S390X + KMP_ARCH_WASM + KMP_ARCH_PPC +                  \
+diff -ruN openmp.orig/runtime/src/kmp_runtime.cpp openmp/runtime/src/kmp_runtime.cpp
+--- openmp.orig/runtime/src/kmp_runtime.cpp	2026-07-11 00:20:53.689664328 +0800
++++ openmp/runtime/src/kmp_runtime.cpp	2026-07-11 00:01:00.220185681 +0800
+@@ -1113,7 +1113,7 @@
    KMP_MB();
  }
  
@@ -917,16 +882,7 @@ index 48e29c9f9..9a98a4ba9 100644
  // Propagate any changes to the floating point control registers out to the team
  // We try to avoid unnecessary writes to the relevant cache line in the team
  // structure, so we don't make changes unless they are needed.
-@@ -1173,7 +1173,7 @@ inline static void updateHWFPControl(kmp_team_t *team) {
- #else
- #define propagateFPControl(x) ((void)0)
- #define updateHWFPControl(x) ((void)0)
--#endif /* KMP_ARCH_X86 || KMP_ARCH_X86_64 */
-+#endif /* KMP_ARCH_X86 || KMP_ARCH_X86_64 || KMP_ARCH_X86_X32 */
- 
- static void __kmp_alloc_argv_entries(int argc, kmp_team_t *team,
-                                      int realloc); // forward declaration
-@@ -1720,11 +1720,11 @@ __kmp_serial_fork_call(ident_t *loc, int gtid, enum fork_context_e call_context,
+@@ -1720,7 +1720,7 @@
  
  /* josh todo: hypothetical question: what do we do for OS X*? */
  #if KMP_OS_LINUX &&                                                            \
@@ -935,12 +891,7 @@ index 48e29c9f9..9a98a4ba9 100644
    SimpleVLA<void *> args(argc);
  #else
    void **args = (void **)KMP_ALLOCA(argc * sizeof(void *));
--#endif /* KMP_OS_LINUX && ( KMP_ARCH_X86 || KMP_ARCH_X86_64 || KMP_ARCH_ARM || \
-+#endif /* KMP_OS_LINUX && ( KMP_ARCH_X86 || KMP_ARCH_X86_64 || KMP_ARCH_X86_X32 || KMP_ARCH_ARM || \
-           KMP_ARCH_AARCH64) */
- 
-   KA_TRACE(
-@@ -4753,11 +4753,11 @@ static void __kmp_initialize_team(kmp_team_t *team, int new_nproc,
+@@ -4753,7 +4753,7 @@
    // TODO???: team->t.t_max_active_levels       = new_max_active_levels;
    team->t.t_sched.sched = new_icvs->sched.sched;
  
@@ -949,12 +900,7 @@ index 48e29c9f9..9a98a4ba9 100644
    team->t.t_fp_control_saved = FALSE; /* not needed */
    team->t.t_x87_fpu_control_word = 0; /* not needed */
    team->t.t_mxcsr = 0; /* not needed */
--#endif /* KMP_ARCH_X86 || KMP_ARCH_X86_64 */
-+#endif /* KMP_ARCH_X86 || KMP_ARCH_X86_64 || KMP_ARCH_X86_X32 */
- 
-   team->t.t_construct = 0;
- 
-@@ -6710,7 +6710,7 @@ void __kmp_register_library_startup(void) {
+@@ -6710,7 +6710,7 @@
      double dtime;
      long ltime;
    } time;
@@ -963,7 +909,7 @@ index 48e29c9f9..9a98a4ba9 100644
    __kmp_initialize_system_tick();
  #endif
    __kmp_read_system_time(&time.dtime);
-@@ -7522,13 +7522,13 @@ void __kmp_parallel_initialize(void) {
+@@ -7522,7 +7522,7 @@
    KA_TRACE(10, ("__kmp_parallel_initialize: enter\n"));
    KMP_ASSERT(KMP_UBER_GTID(gtid));
  
@@ -972,18 +918,19 @@ index 48e29c9f9..9a98a4ba9 100644
    // Save the FP control regs.
    // Worker threads will set theirs to these values at thread startup.
    __kmp_store_x87_fpu_control_word(&__kmp_init_x87_fpu_control_word);
-   __kmp_store_mxcsr(&__kmp_init_mxcsr);
-   __kmp_init_mxcsr &= KMP_X86_MXCSR_MASK;
--#endif /* KMP_ARCH_X86 || KMP_ARCH_X86_64 */
-+#endif /* KMP_ARCH_X86 || KMP_ARCH_X86_64 || KMP_ARCH_X86_X32 */
+@@ -8922,7 +8922,7 @@
  
- #if KMP_OS_UNIX
- #if KMP_HANDLE_SIGNALS
-diff --git a/openmp/runtime/src/kmp_settings.cpp b/openmp/runtime/src/kmp_settings.cpp
-index b6e7e9cad..40ef4c19f 100644
---- a/openmp/runtime/src/kmp_settings.cpp
-+++ b/openmp/runtime/src/kmp_settings.cpp
-@@ -789,7 +789,7 @@ static void __kmp_stg_print_duplicate_lib_ok(kmp_str_buf_t *buffer,
+     int atomic_available = FAST_REDUCTION_ATOMIC_METHOD_GENERATED;
+ 
+-#if KMP_ARCH_X86_64 || KMP_ARCH_PPC64 || KMP_ARCH_AARCH64 ||                   \
++#if KMP_ARCH_X86_64 || KMP_ARCH_X86_X32 || KMP_ARCH_PPC64 || KMP_ARCH_AARCH64 || \
+     KMP_ARCH_MIPS64 || KMP_ARCH_RISCV64 || KMP_ARCH_LOONGARCH64 ||             \
+     KMP_ARCH_VE || KMP_ARCH_S390X || KMP_ARCH_WASM
+ 
+diff -ruN openmp.orig/runtime/src/kmp_settings.cpp openmp/runtime/src/kmp_settings.cpp
+--- openmp.orig/runtime/src/kmp_settings.cpp	2026-07-11 00:20:53.690054765 +0800
++++ openmp/runtime/src/kmp_settings.cpp	2026-07-10 19:07:04.699894981 +0800
+@@ -789,7 +789,7 @@
  // -----------------------------------------------------------------------------
  // KMP_INHERIT_FP_CONTROL
  
@@ -992,16 +939,7 @@ index b6e7e9cad..40ef4c19f 100644
  
  static void __kmp_stg_parse_inherit_fp_control(char const *name,
                                                 char const *value, void *data) {
-@@ -803,7 +803,7 @@ static void __kmp_stg_print_inherit_fp_control(kmp_str_buf_t *buffer,
- #endif /* KMP_DEBUG */
- } // __kmp_stg_print_inherit_fp_control
- 
--#endif /* KMP_ARCH_X86 || KMP_ARCH_X86_64 */
-+#endif /* KMP_ARCH_X86 || KMP_ARCH_X86_64 || KMP_ARCH_X86_X32 */
- 
- // Used for OMP_WAIT_POLICY
- static char const *blocktime_str = NULL;
-@@ -2028,7 +2028,7 @@ __kmp_hw_get_core_type_keyword(kmp_hw_core_type_t type) {
+@@ -2028,7 +2028,7 @@
    case KMP_HW_CORE_TYPE_UNKNOWN:
    case KMP_HW_MAX_NUM_CORE_TYPES:
      return "unknown";
@@ -1010,7 +948,7 @@ index b6e7e9cad..40ef4c19f 100644
    case KMP_HW_CORE_TYPE_ATOM:
      return "intel_atom";
    case KMP_HW_CORE_TYPE_CORE:
-@@ -3090,7 +3090,7 @@ static void __kmp_stg_parse_places(char const *name, char const *value,
+@@ -3090,7 +3090,7 @@
            }
            scan++; // skip ':'
            SKIP_WS(scan);
@@ -1019,7 +957,7 @@ index b6e7e9cad..40ef4c19f 100644
            if (__kmp_match_str("intel_core", scan, &next)) {
              __kmp_affinity.core_attr_gran.core_type = KMP_HW_CORE_TYPE_CORE;
              __kmp_affinity.core_attr_gran.valid = 1;
-@@ -3306,7 +3306,7 @@ static void __kmp_stg_parse_topology_method(char const *name, char const *value,
+@@ -3306,7 +3306,7 @@
      __kmp_affinity_top_method = affinity_top_method_hwloc;
    }
  #endif // KMP_HWLOC_ENABLED
@@ -1028,16 +966,7 @@ index b6e7e9cad..40ef4c19f 100644
    else if (__kmp_str_match("cpuid_leaf31", 12, value) ||
             __kmp_str_match("cpuid 1f", 8, value) ||
             __kmp_str_match("cpuid 31", 8, value) ||
-@@ -3364,7 +3364,7 @@ static void __kmp_stg_parse_topology_method(char const *name, char const *value,
-              __kmp_str_match("leaf4", 5, value)) {
-     __kmp_affinity_top_method = affinity_top_method_apicid;
-   }
--#endif /* KMP_ARCH_X86 || KMP_ARCH_X86_64 */
-+#endif /* KMP_ARCH_X86 || KMP_ARCH_X86_64 || KMP_ARCH_X86_X32 */
-   else if (__kmp_str_match("/proc/cpuinfo", 2, value) ||
-            __kmp_str_match("cpuinfo", 5, value)) {
-     __kmp_affinity_top_method = affinity_top_method_cpuinfo;
-@@ -3395,7 +3395,7 @@ static void __kmp_stg_print_topology_method(kmp_str_buf_t *buffer,
+@@ -3395,7 +3395,7 @@
      value = "all";
      break;
  
@@ -1046,16 +975,7 @@ index b6e7e9cad..40ef4c19f 100644
    case affinity_top_method_x2apicid_1f:
      value = "x2APIC id leaf 0x1f";
      break;
-@@ -3407,7 +3407,7 @@ static void __kmp_stg_print_topology_method(kmp_str_buf_t *buffer,
-   case affinity_top_method_apicid:
-     value = "APIC id";
-     break;
--#endif /* KMP_ARCH_X86 || KMP_ARCH_X86_64 */
-+#endif /* KMP_ARCH_X86 || KMP_ARCH_X86_64 || KMP_ARCH_X86_X32 */
- 
- #if KMP_HWLOC_ENABLED
-   case affinity_top_method_hwloc:
-@@ -5220,7 +5220,7 @@ static void __kmp_stg_parse_hw_subset(char const *name, char const *value,
+@@ -5220,7 +5220,7 @@
        if (attr_ptr) {
          attr.clear();
          // save the attribute
@@ -1064,7 +984,7 @@ index b6e7e9cad..40ef4c19f 100644
          if (__kmp_str_match("intel_core", -1, attr_ptr + 1)) {
            attr.set_core_type(KMP_HW_CORE_TYPE_CORE);
          } else if (__kmp_str_match("intel_atom", -1, attr_ptr + 1)) {
-@@ -5568,10 +5568,10 @@ static kmp_setting_t __kmp_stg_table[] = {
+@@ -5568,7 +5568,7 @@
       __kmp_stg_print_handle_signals, NULL, 0, 0},
  #endif
  
@@ -1072,16 +992,11 @@ index b6e7e9cad..40ef4c19f 100644
 +#if KMP_ARCH_X86 || KMP_ARCH_X86_64 || KMP_ARCH_X86_X32
      {"KMP_INHERIT_FP_CONTROL", __kmp_stg_parse_inherit_fp_control,
       __kmp_stg_print_inherit_fp_control, NULL, 0, 0},
--#endif /* KMP_ARCH_X86 || KMP_ARCH_X86_64 */
-+#endif /* KMP_ARCH_X86 || KMP_ARCH_X86_64 || KMP_ARCH_X86_X32 */
- 
- #ifdef KMP_GOMP_COMPAT
-     {"GOMP_STACKSIZE", __kmp_stg_parse_stacksize, NULL, NULL, 0, 0},
-diff --git a/openmp/runtime/src/kmp_stats.cpp b/openmp/runtime/src/kmp_stats.cpp
-index 8657bfe18..faa2be11e 100644
---- a/openmp/runtime/src/kmp_stats.cpp
-+++ b/openmp/runtime/src/kmp_stats.cpp
-@@ -774,7 +774,7 @@ void kmp_stats_output_module::printHeaderInfo(FILE *statsOut) {
+ #endif /* KMP_ARCH_X86 || KMP_ARCH_X86_64 */
+diff -ruN openmp.orig/runtime/src/kmp_stats.cpp openmp/runtime/src/kmp_stats.cpp
+--- openmp.orig/runtime/src/kmp_stats.cpp	2026-07-11 00:20:53.690244050 +0800
++++ openmp/runtime/src/kmp_stats.cpp	2026-07-10 19:07:04.698145272 +0800
+@@ -774,7 +774,7 @@
    fprintf(statsOut, "# Time of run: %s\n", &buffer[0]);
    if (gethostname(&hostName[0], sizeof(hostName)) == 0)
      fprintf(statsOut, "# Hostname: %s\n", &hostName[0]);
@@ -1090,11 +1005,10 @@ index 8657bfe18..faa2be11e 100644
    fprintf(statsOut, "# CPU:  %s\n", &__kmp_cpuinfo.name[0]);
    fprintf(statsOut, "# Family: %d, Model: %d, Stepping: %d\n",
            __kmp_cpuinfo.family, __kmp_cpuinfo.model, __kmp_cpuinfo.stepping);
-diff --git a/openmp/runtime/src/kmp_stats_timing.cpp b/openmp/runtime/src/kmp_stats_timing.cpp
-index bdfe68c3f..2fb1818a2 100644
---- a/openmp/runtime/src/kmp_stats_timing.cpp
-+++ b/openmp/runtime/src/kmp_stats_timing.cpp
-@@ -28,7 +28,7 @@ double tsc_tick_count::tick_time() {
+diff -ruN openmp.orig/runtime/src/kmp_stats_timing.cpp openmp/runtime/src/kmp_stats_timing.cpp
+--- openmp.orig/runtime/src/kmp_stats_timing.cpp	2026-07-11 00:20:53.690356611 +0800
++++ openmp/runtime/src/kmp_stats_timing.cpp	2026-07-11 00:01:08.640099357 +0800
+@@ -28,7 +28,7 @@
    // pretty bad assumption of 1GHz clock for MIC
    return 1 / ((double)1000 * 1.e6);
  }
@@ -1103,10 +1017,9 @@ index bdfe68c3f..2fb1818a2 100644
  #include <string.h>
  // Extract the value from the CPUID information
  double tsc_tick_count::tick_time() {
-diff --git a/openmp/runtime/src/kmp_utility.cpp b/openmp/runtime/src/kmp_utility.cpp
-index bfa450c9c..240c81905 100644
---- a/openmp/runtime/src/kmp_utility.cpp
-+++ b/openmp/runtime/src/kmp_utility.cpp
+diff -ruN openmp.orig/runtime/src/kmp_utility.cpp openmp/runtime/src/kmp_utility.cpp
+--- openmp.orig/runtime/src/kmp_utility.cpp	2026-07-11 00:20:53.690907540 +0800
++++ openmp/runtime/src/kmp_utility.cpp	2026-07-10 19:07:04.706262545 +0800
 @@ -18,7 +18,7 @@
  
  static const char *unknown = "unknown";
@@ -1116,19 +1029,9 @@ index bfa450c9c..240c81905 100644
  
  /* NOTE: If called before serial_initialize (i.e. from runtime_initialize), then
     the debugging package has not been initialized yet, and only "0" will print
-@@ -217,7 +217,7 @@ void __kmp_query_cpuid(kmp_cpuinfo_t *p) {
-   }
- }
- 
--#endif /* KMP_ARCH_X86 || KMP_ARCH_X86_64 */
-+#endif /* KMP_ARCH_X86 || KMP_ARCH_X86_64 || KMP_ARCH_X86_X32 */
- 
- void __kmp_expand_host_name(char *buffer, size_t size) {
-   KMP_DEBUG_ASSERT(size >= sizeof(unknown));
-diff --git a/openmp/runtime/src/z_Linux_asm.S b/openmp/runtime/src/z_Linux_asm.S
-index 12fea67e0..a89ecf0f2 100644
---- a/openmp/runtime/src/z_Linux_asm.S
-+++ b/openmp/runtime/src/z_Linux_asm.S
+diff -ruN openmp.orig/runtime/src/z_Linux_asm.S openmp/runtime/src/z_Linux_asm.S
+--- openmp.orig/runtime/src/z_Linux_asm.S	2026-07-11 00:20:53.692358278 +0800
++++ openmp/runtime/src/z_Linux_asm.S	2026-07-11 00:06:36.753535659 +0800
 @@ -17,7 +17,7 @@
  
  #include "kmp_config.h"
@@ -1138,11 +1041,56 @@ index 12fea67e0..a89ecf0f2 100644
  .att_syntax
  
  # if defined(__ELF__) && defined(__CET__) && defined(__has_include)
-diff --git a/openmp/runtime/src/z_Linux_util.cpp b/openmp/runtime/src/z_Linux_util.cpp
-index c7fe0642c..9cefb753a 100644
---- a/openmp/runtime/src/z_Linux_util.cpp
-+++ b/openmp/runtime/src/z_Linux_util.cpp
-@@ -321,7 +321,7 @@ int __kmp_futex_determine_capable() {
+@@ -301,6 +301,27 @@
+ #  endif /* KMP_OS_DARWIN */
+ # endif /* KMP_ARCH_X86_64 */
+ 
++# if KMP_ARCH_X86_X32
++#  if KMP_OS_DARWIN
++        .data
++        .comm .gomp_critical_user_,32
++        .data
++        .globl ___kmp_unnamed_critical_addr
++___kmp_unnamed_critical_addr:
++        .quad .gomp_critical_user_
++#  else /* Linux* OS */
++        .data
++        .comm .gomp_critical_user_,32,8
++        .data
++	ALIGN 8
++        .global __kmp_unnamed_critical_addr
++__kmp_unnamed_critical_addr:
++        .8byte .gomp_critical_user_
++        .type __kmp_unnamed_critical_addr,@object
++        .size __kmp_unnamed_critical_addr,8
++#  endif /* KMP_OS_DARWIN */
++# endif /* KMP_ARCH_X86_X32 */
++
+ #endif /* KMP_GOMP_COMPAT */
+ 
+ 
+@@ -689,7 +710,7 @@
+ #endif /* KMP_ARCH_X86 */
+ 
+ 
+-#if KMP_ARCH_X86_64
++#if KMP_ARCH_X86_64 || KMP_ARCH_X86_X32
+ 
+ // -----------------------------------------------------------------------
+ // microtasking routines specifically written for IA-32 architecture and
+@@ -1297,7 +1318,7 @@
+         DEBUG_INFO __kmp_bsr32
+ 
+ // -----------------------------------------------------------------------
+-#endif /* KMP_ARCH_X86_64 */
++#endif /* KMP_ARCH_X86_64 || KMP_ARCH_X86_X32 */
+ 
+ // '
+ #if KMP_ARCH_AARCH64 || KMP_ARCH_AARCH64_32
+diff -ruN openmp.orig/runtime/src/z_Linux_util.cpp openmp/runtime/src/z_Linux_util.cpp
+--- openmp.orig/runtime/src/z_Linux_util.cpp	2026-07-11 00:20:53.692449733 +0800
++++ openmp/runtime/src/z_Linux_util.cpp	2026-07-11 00:04:01.231701488 +0800
+@@ -321,7 +321,7 @@
  
  #endif // KMP_USE_FUTEX
  
@@ -1151,16 +1099,7 @@ index c7fe0642c..9cefb753a 100644
  /* Only 32-bit "add-exchange" instruction on IA-32 architecture causes us to
     use compare_and_store for these routines */
  
-@@ -437,7 +437,7 @@ kmp_uint64 __kmp_test_then_and64(volatile kmp_uint64 *p, kmp_uint64 d) {
-   return old_value;
- }
- 
--#endif /* (KMP_ARCH_X86 || KMP_ARCH_X86_64) && (! KMP_ASM_INTRINS) */
-+#endif /* (KMP_ARCH_X86 || KMP_ARCH_X86_64 || KMP_ARCH_X86_X32) && (! KMP_ASM_INTRINS) */
- 
- void __kmp_terminate_thread(int gtid) {
-   int status;
-@@ -566,12 +566,12 @@ static void *__kmp_launch_worker(void *thr) {
+@@ -566,7 +566,7 @@
    KMP_CHECK_SYSFAIL("pthread_setcancelstate", status);
  #endif
  
@@ -1169,13 +1108,7 @@ index c7fe0642c..9cefb753a 100644
    // Set FP control regs to be a copy of the parallel initialization thread's.
    __kmp_clear_x87_fpu_status_word();
    __kmp_load_x87_fpu_control_word(&__kmp_init_x87_fpu_control_word);
-   __kmp_load_mxcsr(&__kmp_init_mxcsr);
--#endif /* KMP_ARCH_X86 || KMP_ARCH_X86_64 */
-+#endif /* KMP_ARCH_X86 || KMP_ARCH_X86_64 || KMP_ARCH_X86_X32 */
- 
- #ifdef KMP_BLOCK_SIGNALS
-   status = sigfillset(&new_set);
-@@ -1948,11 +1948,11 @@ void __kmp_runtime_initialize(void) {
+@@ -1948,11 +1948,11 @@
      return;
    }
  
@@ -1189,7 +1122,7 @@ index c7fe0642c..9cefb753a 100644
  
    __kmp_xproc = __kmp_get_xproc();
  
-@@ -2084,7 +2084,7 @@ kmp_uint64 __kmp_now_nsec() {
+@@ -2084,7 +2084,7 @@
    return nsec;
  }
  
@@ -1198,82 +1131,3 @@ index c7fe0642c..9cefb753a 100644
  /* Measure clock ticks per millisecond */
  void __kmp_initialize_system_tick() {
    kmp_uint64 now, nsec2, diff;
-@@ -2736,7 +2736,7 @@ finish: // Clean up and exit.
- 
- #endif // USE_LOAD_BALANCE
- 
--#if !(KMP_ARCH_X86 || KMP_ARCH_X86_64 || KMP_MIC || KMP_ARCH_AARCH64 ||        \
-+#if !(KMP_ARCH_X86 || KMP_ARCH_X86_64 || KMP_ARCH_X86_X32 || KMP_MIC || KMP_ARCH_AARCH64 ||        \
-       KMP_ARCH_PPC64 || KMP_ARCH_RISCV64 || KMP_ARCH_LOONGARCH64 ||            \
-       KMP_ARCH_ARM || KMP_ARCH_VE || KMP_ARCH_S390X || KMP_ARCH_PPC_XCOFF ||   \
-       KMP_ARCH_AARCH64_32)
-diff --git a/openmp/runtime/src/z_Windows_NT-586_util.cpp b/openmp/runtime/src/z_Windows_NT-586_util.cpp
-index 37759feaf..2cfab41aa 100644
---- a/openmp/runtime/src/z_Windows_NT-586_util.cpp
-+++ b/openmp/runtime/src/z_Windows_NT-586_util.cpp
-@@ -12,7 +12,7 @@
- 
- #include "kmp.h"
- 
--#if (KMP_ARCH_X86 || KMP_ARCH_X86_64 || KMP_ARCH_AARCH64 || KMP_ARCH_ARM)
-+#if (KMP_ARCH_X86 || KMP_ARCH_X86_64 || KMP_ARCH_X86_X32 || KMP_ARCH_AARCH64 || KMP_ARCH_ARM)
- /* Only 32-bit "add-exchange" instruction on IA-32 architecture causes us to
-    use compare_and_store for these routines */
- 
-@@ -74,7 +74,7 @@ kmp_uint32 __kmp_test_then_and32(volatile kmp_uint32 *p, kmp_uint32 d) {
-   return old_value;
- }
- 
--#if KMP_ARCH_X86 || KMP_ARCH_X86_64
-+#if KMP_ARCH_X86 || KMP_ARCH_X86_64 || KMP_ARCH_X86_X32
- kmp_int8 __kmp_test_then_add8(volatile kmp_int8 *p, kmp_int8 d) {
-   kmp_int64 old_value, new_value;
- 
-@@ -102,7 +102,7 @@ kmp_int64 __kmp_test_then_add64(volatile kmp_int64 *p, kmp_int64 d) {
-   return old_value;
- }
- #endif /* KMP_ARCH_X86 */
--#endif /* KMP_ARCH_X86 || KMP_ARCH_X86_64 */
-+#endif /* KMP_ARCH_X86 || KMP_ARCH_X86_64 || KMP_ARCH_X86_X32 */
- 
- kmp_uint64 __kmp_test_then_or64(volatile kmp_uint64 *p, kmp_uint64 d) {
-   kmp_uint64 old_value, new_value;
-@@ -189,4 +189,4 @@ int __kmp_invoke_microtask(microtask_t pkfn, int gtid, int tid, int argc,
- }
- #endif
- 
--#endif /* KMP_ARCH_X86 || KMP_ARCH_X86_64 || KMP_ARCH_AARCH64 || KMP_ARCH_ARM */
-+#endif /* KMP_ARCH_X86 || KMP_ARCH_X86_64 || KMP_ARCH_X86_X32 || KMP_ARCH_AARCH64 || KMP_ARCH_ARM */
-diff --git a/openmp/runtime/src/z_Windows_NT_util.cpp b/openmp/runtime/src/z_Windows_NT_util.cpp
-index d75b48b2c..c8890eda7 100644
---- a/openmp/runtime/src/z_Windows_NT_util.cpp
-+++ b/openmp/runtime/src/z_Windows_NT_util.cpp
-@@ -717,11 +717,11 @@ void __kmp_runtime_initialize(void) {
- #endif /* USE_ITT_BUILD */
-   __kmp_initialize_system_tick();
- 
--#if (KMP_ARCH_X86 || KMP_ARCH_X86_64)
-+#if (KMP_ARCH_X86 || KMP_ARCH_X86_64 || KMP_ARCH_X86_X32)
-   if (!__kmp_cpuinfo.initialized) {
-     __kmp_query_cpuid(&__kmp_cpuinfo);
-   }
--#endif /* KMP_ARCH_X86 || KMP_ARCH_X86_64 */
-+#endif /* KMP_ARCH_X86 || KMP_ARCH_X86_64 || KMP_ARCH_X86_X32 */
- 
- /* Set up minimum number of threads to switch to TLS gtid */
- #if KMP_OS_WINDOWS && !KMP_DYNAMIC_LIB
-@@ -1009,12 +1009,12 @@ extern "C" void *__stdcall __kmp_launch_worker(void *arg) {
- 
-   __kmp_affinity_bind_init_mask(gtid);
- 
--#if KMP_ARCH_X86 || KMP_ARCH_X86_64
-+#if KMP_ARCH_X86 || KMP_ARCH_X86_64 || KMP_ARCH_X86_X32
-   // Set FP control regs to be a copy of the parallel initialization thread's.
-   __kmp_clear_x87_fpu_status_word();
-   __kmp_load_x87_fpu_control_word(&__kmp_init_x87_fpu_control_word);
-   __kmp_load_mxcsr(&__kmp_init_mxcsr);
--#endif /* KMP_ARCH_X86 || KMP_ARCH_X86_64 */
-+#endif /* KMP_ARCH_X86 || KMP_ARCH_X86_64 || KMP_ARCH_X86_X32 */
- 
-   if (__kmp_stkoffset > 0 && gtid > 0) {
-     padding = KMP_ALLOCA(gtid * __kmp_stkoffset);
