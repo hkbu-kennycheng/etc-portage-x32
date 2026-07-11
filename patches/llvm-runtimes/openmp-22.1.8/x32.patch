@@ -1,6 +1,6 @@
-diff -ruN openmp.orig/cmake/modules/LibompHandleFlags.cmake openmp/cmake/modules/LibompHandleFlags.cmake
---- openmp.orig/cmake/modules/LibompHandleFlags.cmake	2026-07-11 00:20:53.677728792 +0800
-+++ openmp/cmake/modules/LibompHandleFlags.cmake	2026-07-10 18:57:05.982362654 +0800
+diff -ruN a/openmp/cmake/modules/LibompHandleFlags.cmake b/openmp/cmake/modules/LibompHandleFlags.cmake
+--- a/openmp/cmake/modules/LibompHandleFlags.cmake	2026-06-16 06:33:53.000000000 +0800
++++ b/openmp/cmake/modules/LibompHandleFlags.cmake	2026-07-11 09:00:53.125318006 +0800
 @@ -60,13 +60,17 @@
      libomp_append(flags_local -Qinline-min-size=1 LIBOMP_HAVE_INLINE_MIN_SIZE_FLAG)
    endif()
@@ -55,9 +55,9 @@ diff -ruN openmp.orig/cmake/modules/LibompHandleFlags.cmake openmp/cmake/modules
    elseif(${MIC})
      libomp_append(ldflags_local -mmic LIBOMP_HAVE_MMIC_FLAG)
      libomp_append(ldflags_local -Wl,-x LIBOMP_HAVE_X_FLAG)
-diff -ruN openmp.orig/runtime/CMakeLists.txt openmp/runtime/CMakeLists.txt
---- openmp.orig/runtime/CMakeLists.txt	2026-07-11 00:20:53.685128416 +0800
-+++ openmp/runtime/CMakeLists.txt	2026-07-10 18:56:17.326610875 +0800
+diff -ruN a/openmp/runtime/CMakeLists.txt b/openmp/runtime/CMakeLists.txt
+--- a/openmp/runtime/CMakeLists.txt	2026-06-16 06:33:53.000000000 +0800
++++ b/openmp/runtime/CMakeLists.txt	2026-07-11 09:00:53.145318252 +0800
 @@ -91,7 +91,7 @@
    endif()
  endif()
@@ -84,9 +84,9 @@ diff -ruN openmp.orig/runtime/CMakeLists.txt openmp/runtime/CMakeLists.txt
  elseif("${LIBOMP_ARCH}" STREQUAL "arm") # ARM architecture
    set(ARM TRUE)
  elseif("${LIBOMP_ARCH}" STREQUAL "ppc") # PPC32 architecture
-diff -ruN openmp.orig/runtime/cmake/LibompDefinitions.cmake openmp/runtime/cmake/LibompDefinitions.cmake
---- openmp.orig/runtime/cmake/LibompDefinitions.cmake	2026-07-11 00:20:53.685210065 +0800
-+++ openmp/runtime/cmake/LibompDefinitions.cmake	2026-07-10 18:57:24.418698159 +0800
+diff -ruN a/openmp/runtime/cmake/LibompDefinitions.cmake b/openmp/runtime/cmake/LibompDefinitions.cmake
+--- a/openmp/runtime/cmake/LibompDefinitions.cmake	2026-06-16 06:33:53.000000000 +0800
++++ b/openmp/runtime/cmake/LibompDefinitions.cmake	2026-07-11 09:00:53.131984756 +0800
 @@ -32,6 +32,12 @@
      libomp_append(cppflags_local "-D LIBOMP_HAVE_PTHREAD_SET_NAME_NP" LIBOMP_HAVE_PTHREAD_SET_NAME_NP)
    endif()
@@ -100,9 +100,9 @@ diff -ruN openmp.orig/runtime/cmake/LibompDefinitions.cmake openmp/runtime/cmake
    # CMake doesn't include CPPFLAGS from environment, but we will.
    set(${cppflags} ${cppflags_local} ${LIBOMP_CPPFLAGS} $ENV{CPPFLAGS} PARENT_SCOPE)
  endfunction()
-diff -ruN openmp.orig/runtime/cmake/LibompGetArchitecture.cmake openmp/runtime/cmake/LibompGetArchitecture.cmake
---- openmp.orig/runtime/cmake/LibompGetArchitecture.cmake	2026-07-11 00:20:53.685327841 +0800
-+++ openmp/runtime/cmake/LibompGetArchitecture.cmake	2026-07-10 18:57:42.218386292 +0800
+diff -ruN a/openmp/runtime/cmake/LibompGetArchitecture.cmake b/openmp/runtime/cmake/LibompGetArchitecture.cmake
+--- a/openmp/runtime/cmake/LibompGetArchitecture.cmake	2026-06-16 06:33:53.000000000 +0800
++++ b/openmp/runtime/cmake/LibompGetArchitecture.cmake	2026-07-11 09:00:53.131984756 +0800
 @@ -18,7 +18,11 @@
      #if defined(__KNC__)
        #error ARCHITECTURE=mic
@@ -115,9 +115,9 @@ diff -ruN openmp.orig/runtime/cmake/LibompGetArchitecture.cmake openmp/runtime/c
      #elif defined(__i386) || defined(__i386__) || defined(__IA32__) || defined(_M_I86) || defined(_M_IX86) || defined(__X86__) || defined(_X86_)
        #error ARCHITECTURE=i386
      #elif defined(__ARM_ARCH_7__) || defined(__ARM_ARCH_7R__) ||  defined(__ARM_ARCH_7A__) || defined(__ARM_ARCH_7M__)  || defined(__ARM_ARCH_7S__)
-diff -ruN openmp.orig/runtime/cmake/LibompMicroTests.cmake openmp/runtime/cmake/LibompMicroTests.cmake
---- openmp.orig/runtime/cmake/LibompMicroTests.cmake	2026-07-11 00:20:53.685371213 +0800
-+++ openmp/runtime/cmake/LibompMicroTests.cmake	2026-07-10 18:58:58.363802899 +0800
+diff -ruN a/openmp/runtime/cmake/LibompMicroTests.cmake b/openmp/runtime/cmake/LibompMicroTests.cmake
+--- a/openmp/runtime/cmake/LibompMicroTests.cmake	2026-06-16 06:33:53.000000000 +0800
++++ b/openmp/runtime/cmake/LibompMicroTests.cmake	2026-07-11 09:00:53.131984756 +0800
 @@ -74,6 +74,8 @@
    libomp_append(libomp_test_touch_libs "${CMAKE_THREAD_LIBS_INIT}")
    if(${IA32})
@@ -140,9 +140,9 @@ diff -ruN openmp.orig/runtime/cmake/LibompMicroTests.cmake openmp/runtime/cmake/
      elseif(${ARM})
        libomp_append(libomp_expected_library_deps libc.so.6)
        libomp_append(libomp_expected_library_deps libffi.so.6)
-diff -ruN openmp.orig/runtime/cmake/config-ix.cmake openmp/runtime/cmake/config-ix.cmake
---- openmp.orig/runtime/cmake/config-ix.cmake	2026-07-11 00:20:53.685412628 +0800
-+++ openmp/runtime/cmake/config-ix.cmake	2026-07-10 18:58:27.280963719 +0800
+diff -ruN a/openmp/runtime/cmake/config-ix.cmake b/openmp/runtime/cmake/config-ix.cmake
+--- a/openmp/runtime/cmake/config-ix.cmake	2026-06-16 06:33:53.000000000 +0800
++++ b/openmp/runtime/cmake/config-ix.cmake	2026-07-11 09:00:53.131984756 +0800
 @@ -168,7 +168,7 @@
  endif()
  
@@ -169,9 +169,9 @@ diff -ruN openmp.orig/runtime/cmake/config-ix.cmake openmp/runtime/cmake/config-
  #      (LIBOMP_ARCH STREQUAL arm) OR
        (LIBOMP_ARCH STREQUAL aarch64) OR
        (LIBOMP_ARCH STREQUAL aarch64_32) OR
-diff -ruN openmp.orig/runtime/src/kmp.h openmp/runtime/src/kmp.h
---- openmp.orig/runtime/src/kmp.h	2026-07-11 00:20:53.686655840 +0800
-+++ openmp/runtime/src/kmp.h	2026-07-11 00:00:07.027401788 +0800
+diff -ruN a/openmp/runtime/src/kmp.h b/openmp/runtime/src/kmp.h
+--- a/openmp/runtime/src/kmp.h	2026-06-16 06:33:53.000000000 +0800
++++ b/openmp/runtime/src/kmp.h	2026-07-11 09:00:53.135318130 +0800
 @@ -29,7 +29,7 @@
  #endif
  #define KMP_WEIGHTED_ITERATIONS_SUPPORTED                                      \
@@ -308,9 +308,9 @@ diff -ruN openmp.orig/runtime/src/kmp.h openmp/runtime/src/kmp.h
  extern void
  __kmp_initialize_system_tick(void); /* Initialize timer tick value */
  #endif
-diff -ruN openmp.orig/runtime/src/kmp_affinity.cpp openmp/runtime/src/kmp_affinity.cpp
---- openmp.orig/runtime/src/kmp_affinity.cpp	2026-07-11 00:20:53.686851361 +0800
-+++ openmp/runtime/src/kmp_affinity.cpp	2026-07-11 00:01:29.863215884 +0800
+diff -ruN a/openmp/runtime/src/kmp_affinity.cpp b/openmp/runtime/src/kmp_affinity.cpp
+--- a/openmp/runtime/src/kmp_affinity.cpp	2026-06-16 06:33:53.000000000 +0800
++++ b/openmp/runtime/src/kmp_affinity.cpp	2026-07-11 09:00:53.135318130 +0800
 @@ -174,7 +174,7 @@
    case KMP_HW_CORE_TYPE_UNKNOWN:
    case KMP_HW_MAX_NUM_CORE_TYPES:
@@ -374,30 +374,50 @@ diff -ruN openmp.orig/runtime/src/kmp_affinity.cpp openmp/runtime/src/kmp_affini
    else if (__kmp_affinity_top_method == affinity_top_method_x2apicid ||
             __kmp_affinity_top_method == affinity_top_method_x2apicid_1f) {
      success = __kmp_affinity_create_x2apicid_map(&msg_id);
-diff -ruN openmp.orig/runtime/src/kmp_affinity.h openmp/runtime/src/kmp_affinity.h
---- openmp.orig/runtime/src/kmp_affinity.h	2026-07-11 00:20:53.687004710 +0800
-+++ openmp/runtime/src/kmp_affinity.h	2026-07-10 23:41:25.710810127 +0800
-@@ -234,6 +234,17 @@
+diff -ruN a/openmp/runtime/src/kmp_affinity.h b/openmp/runtime/src/kmp_affinity.h
+--- a/openmp/runtime/src/kmp_affinity.h	2026-06-16 06:33:53.000000000 +0800
++++ b/openmp/runtime/src/kmp_affinity.h	2026-07-11 09:12:37.127079607 +0800
+@@ -201,7 +201,18 @@
+    all systems of the same arch where they are defined, and they cannot change.
+    stone forever. */
+ #include <sys/syscall.h>
+-#if KMP_ARCH_X86 || KMP_ARCH_ARM
++#if KMP_ARCH_X86_X32
++#ifndef __NR_sched_setaffinity
++#define __NR_sched_setaffinity (0x40000000 + 203)
++#elif __NR_sched_setaffinity != (0x40000000 + 203)
++#error Wrong code for setaffinity system call.
++#endif /* __NR_sched_setaffinity */
++#ifndef __NR_sched_getaffinity
++#define __NR_sched_getaffinity (0x40000000 + 204)
++#elif __NR_sched_getaffinity != (0x40000000 + 204)
++#error Wrong code for getaffinity system call.
++#endif /* __NR_sched_getaffinity */
++#elif KMP_ARCH_X86 || KMP_ARCH_ARM
+ #ifndef __NR_sched_setaffinity
+ #define __NR_sched_setaffinity 241
+ #elif __NR_sched_setaffinity != 241
+@@ -234,6 +245,17 @@
  #elif __NR_sched_getaffinity != 204
  #error Wrong code for getaffinity system call.
  #endif /* __NR_sched_getaffinity */
 +#elif KMP_ARCH_X86_X32
 +#ifndef __NR_sched_setaffinity
-+#define __NR_sched_setaffinity 203
-+#elif __NR_sched_setaffinity != 203
++#define __NR_sched_setaffinity (0x40000000 + 203)
++#elif __NR_sched_setaffinity != (0x40000000 + 203)
 +#error Wrong code for setaffinity system call.
 +#endif /* __NR_sched_setaffinity */
 +#ifndef __NR_sched_getaffinity
-+#define __NR_sched_getaffinity 204
-+#elif __NR_sched_getaffinity != 204
++#define __NR_sched_getaffinity (0x40000000 + 204)
++#elif __NR_sched_getaffinity != (0x40000000 + 204)
 +#error Wrong code for getaffinity system call.
 +#endif /* __NR_sched_getaffinity */
  #elif KMP_ARCH_PPC64
  #ifndef __NR_sched_setaffinity
  #define __NR_sched_setaffinity 222
-diff -ruN openmp.orig/runtime/src/kmp_atomic.cpp openmp/runtime/src/kmp_atomic.cpp
---- openmp.orig/runtime/src/kmp_atomic.cpp	2026-07-11 00:20:53.687230256 +0800
-+++ openmp/runtime/src/kmp_atomic.cpp	2026-07-11 00:04:57.677817499 +0800
+diff -ruN a/openmp/runtime/src/kmp_atomic.cpp b/openmp/runtime/src/kmp_atomic.cpp
+--- a/openmp/runtime/src/kmp_atomic.cpp	2026-06-16 06:33:53.000000000 +0800
++++ b/openmp/runtime/src/kmp_atomic.cpp	2026-07-11 09:00:53.135318130 +0800
 @@ -865,7 +865,7 @@
  
  #endif // KMP_OS_WINDOWS && (KMP_ARCH_AARCH64 || KMP_ARCH_ARM)
@@ -569,9 +589,9 @@ diff -ruN openmp.orig/runtime/src/kmp_atomic.cpp openmp/runtime/src/kmp_atomic.c
  
  // OpenMP 5.1 compare and swap
  
-diff -ruN openmp.orig/runtime/src/kmp_atomic.h openmp/runtime/src/kmp_atomic.h
---- openmp.orig/runtime/src/kmp_atomic.h	2026-07-11 00:20:53.687390345 +0800
-+++ openmp/runtime/src/kmp_atomic.h	2026-07-10 19:07:04.648408640 +0800
+diff -ruN a/openmp/runtime/src/kmp_atomic.h b/openmp/runtime/src/kmp_atomic.h
+--- a/openmp/runtime/src/kmp_atomic.h	2026-06-16 06:33:53.000000000 +0800
++++ b/openmp/runtime/src/kmp_atomic.h	2026-07-11 09:00:53.135318130 +0800
 @@ -701,7 +701,7 @@
  
  // OpenMP 4.0: x = expr binop x for non-commutative operations.
@@ -590,9 +610,9 @@ diff -ruN openmp.orig/runtime/src/kmp_atomic.h openmp/runtime/src/kmp_atomic.h
  char __kmpc_atomic_fixed1_sub_cpt_rev(ident_t *id_ref, int gtid, char *lhs,
                                        char rhs, int flag);
  char __kmpc_atomic_fixed1_div_cpt_rev(ident_t *id_ref, int gtid, char *lhs,
-diff -ruN openmp.orig/runtime/src/kmp_csupport.cpp openmp/runtime/src/kmp_csupport.cpp
---- openmp.orig/runtime/src/kmp_csupport.cpp	2026-07-11 00:20:53.687864528 +0800
-+++ openmp/runtime/src/kmp_csupport.cpp	2026-07-11 00:01:50.036344168 +0800
+diff -ruN a/openmp/runtime/src/kmp_csupport.cpp b/openmp/runtime/src/kmp_csupport.cpp
+--- a/openmp/runtime/src/kmp_csupport.cpp	2026-06-16 06:33:53.000000000 +0800
++++ b/openmp/runtime/src/kmp_csupport.cpp	2026-07-11 09:00:53.135318130 +0800
 @@ -711,7 +711,7 @@
  
      /* return to the parallel section */
@@ -629,9 +649,9 @@ diff -ruN openmp.orig/runtime/src/kmp_csupport.cpp openmp/runtime/src/kmp_csuppo
      // "fast" path implemented to fix customer performance issue
      kmp_tas_lock_t *tl = (kmp_tas_lock_t *)user_lock;
  #if USE_ITT_BUILD
-diff -ruN openmp.orig/runtime/src/kmp_global.cpp openmp/runtime/src/kmp_global.cpp
---- openmp.orig/runtime/src/kmp_global.cpp	2026-07-11 00:20:53.688761593 +0800
-+++ openmp/runtime/src/kmp_global.cpp	2026-07-10 19:07:04.591390211 +0800
+diff -ruN a/openmp/runtime/src/kmp_global.cpp b/openmp/runtime/src/kmp_global.cpp
+--- a/openmp/runtime/src/kmp_global.cpp	2026-06-16 06:33:53.000000000 +0800
++++ b/openmp/runtime/src/kmp_global.cpp	2026-07-11 09:00:53.135318130 +0800
 @@ -18,7 +18,7 @@
  
  kmp_key_t __kmp_gtid_threadprivate_key;
@@ -650,9 +670,21 @@ diff -ruN openmp.orig/runtime/src/kmp_global.cpp openmp/runtime/src/kmp_global.c
  int __kmp_inherit_fp_control = TRUE;
  kmp_int16 __kmp_init_x87_fpu_control_word = 0;
  kmp_uint32 __kmp_init_mxcsr = 0;
-diff -ruN openmp.orig/runtime/src/kmp_itt.h openmp/runtime/src/kmp_itt.h
---- openmp.orig/runtime/src/kmp_itt.h	2026-07-11 00:20:53.689114035 +0800
-+++ openmp/runtime/src/kmp_itt.h	2026-07-11 00:01:55.069626497 +0800
+diff -ruN a/openmp/runtime/src/kmp_gsupport.cpp b/openmp/runtime/src/kmp_gsupport.cpp
+--- a/openmp/runtime/src/kmp_gsupport.cpp	2026-06-16 06:33:53.000000000 +0800
++++ b/openmp/runtime/src/kmp_gsupport.cpp	2026-07-11 09:22:32.563900855 +0800
+@@ -357,7 +357,7 @@
+ // They come in two flavors: 64-bit unsigned, and either 32-bit signed
+ // (IA-32 architecture) or 64-bit signed (Intel(R) 64).
+ 
+-#if KMP_ARCH_X86 || KMP_ARCH_ARM || KMP_ARCH_MIPS || KMP_ARCH_WASM ||          \
++#if KMP_ARCH_X86 || KMP_ARCH_X86_X32 || KMP_ARCH_ARM || KMP_ARCH_MIPS || KMP_ARCH_WASM ||          \
+     KMP_ARCH_PPC || KMP_ARCH_AARCH64_32 || KMP_ARCH_SPARC32
+ #define KMP_DISPATCH_INIT __kmp_aux_dispatch_init_4
+ #define KMP_DISPATCH_FINI_CHUNK __kmp_aux_dispatch_fini_chunk_4
+diff -ruN a/openmp/runtime/src/kmp_itt.h b/openmp/runtime/src/kmp_itt.h
+--- a/openmp/runtime/src/kmp_itt.h	2026-06-16 06:33:53.000000000 +0800
++++ b/openmp/runtime/src/kmp_itt.h	2026-07-11 09:00:53.135318130 +0800
 @@ -165,11 +165,11 @@
     therefore uninteresting when collecting traces for architecture simulation.
   */
@@ -667,9 +699,9 @@ diff -ruN openmp.orig/runtime/src/kmp_itt.h openmp/runtime/src/kmp_itt.h
  // Portable (at least for gcc and icc) code to insert the necessary instructions
  // to set %ebx and execute the unlikely no-op.
  #if defined(__INTEL_COMPILER)
-diff -ruN openmp.orig/runtime/src/kmp_lock.cpp openmp/runtime/src/kmp_lock.cpp
---- openmp.orig/runtime/src/kmp_lock.cpp	2026-07-11 00:20:53.689252534 +0800
-+++ openmp/runtime/src/kmp_lock.cpp	2026-07-10 19:07:04.655627105 +0800
+diff -ruN a/openmp/runtime/src/kmp_lock.cpp b/openmp/runtime/src/kmp_lock.cpp
+--- a/openmp/runtime/src/kmp_lock.cpp	2026-06-16 06:33:53.000000000 +0800
++++ b/openmp/runtime/src/kmp_lock.cpp	2026-07-11 09:00:53.135318130 +0800
 @@ -2633,7 +2633,7 @@
  }
  
@@ -679,9 +711,9 @@ diff -ruN openmp.orig/runtime/src/kmp_lock.cpp openmp/runtime/src/kmp_lock.cpp
  #define __kmp_tsc() __kmp_hardware_timestamp()
  // Runtime's default backoff parameters
  kmp_backoff_t __kmp_spin_backoff_params = {1, 4096, 100};
-diff -ruN openmp.orig/runtime/src/kmp_lock.h openmp/runtime/src/kmp_lock.h
---- openmp.orig/runtime/src/kmp_lock.h	2026-07-11 00:20:53.689375809 +0800
-+++ openmp/runtime/src/kmp_lock.h	2026-07-11 00:00:32.057142368 +0800
+diff -ruN a/openmp/runtime/src/kmp_lock.h b/openmp/runtime/src/kmp_lock.h
+--- a/openmp/runtime/src/kmp_lock.h	2026-06-16 06:33:53.000000000 +0800
++++ b/openmp/runtime/src/kmp_lock.h	2026-07-11 09:00:53.135318130 +0800
 @@ -168,7 +168,7 @@
  #ifndef KMP_USE_FUTEX
  #define KMP_USE_FUTEX                                                          \
@@ -709,9 +741,9 @@ diff -ruN openmp.orig/runtime/src/kmp_lock.h openmp/runtime/src/kmp_lock.h
  static inline int __kmp_test_nested_user_lock_with_checks(kmp_user_lock_p lck,
                                                            kmp_int32 gtid) {
    if (__kmp_user_lock_kind == lk_tas) {
-diff -ruN openmp.orig/runtime/src/kmp_os.h openmp/runtime/src/kmp_os.h
---- openmp.orig/runtime/src/kmp_os.h	2026-07-11 00:20:53.689489479 +0800
-+++ openmp/runtime/src/kmp_os.h	2026-07-10 23:47:56.526942983 +0800
+diff -ruN a/openmp/runtime/src/kmp_os.h b/openmp/runtime/src/kmp_os.h
+--- a/openmp/runtime/src/kmp_os.h	2026-06-16 06:33:53.000000000 +0800
++++ b/openmp/runtime/src/kmp_os.h	2026-07-11 09:00:53.135318130 +0800
 @@ -97,7 +97,7 @@
  
  /* Check for quad-precision extension. */
@@ -806,9 +838,9 @@ diff -ruN openmp.orig/runtime/src/kmp_os.h openmp/runtime/src/kmp_os.h
  #endif
  
  // Warning levels
-diff -ruN openmp.orig/runtime/src/kmp_platform.h openmp/runtime/src/kmp_platform.h
---- openmp.orig/runtime/src/kmp_platform.h	2026-07-11 00:20:53.689545674 +0800
-+++ openmp/runtime/src/kmp_platform.h	2026-07-10 23:21:48.685374837 +0800
+diff -ruN a/openmp/runtime/src/kmp_platform.h b/openmp/runtime/src/kmp_platform.h
+--- a/openmp/runtime/src/kmp_platform.h	2026-06-16 06:33:53.000000000 +0800
++++ b/openmp/runtime/src/kmp_platform.h	2026-07-11 09:18:57.408132413 +0800
 @@ -117,6 +117,7 @@
  
  #define KMP_ARCH_X86 0
@@ -836,7 +868,7 @@ diff -ruN openmp.orig/runtime/src/kmp_platform.h openmp/runtime/src/kmp_platform
  
  #if KMP_OS_UNIX
 -#if defined __x86_64
-+#if defined(__ILP32__)
++#if defined(__ILP32__) && defined(__x86_64)
 +#undef KMP_ARCH_X86_X32
 +#define KMP_ARCH_X86_X32 1
 +#elif defined __x86_64
@@ -870,9 +902,9 @@ diff -ruN openmp.orig/runtime/src/kmp_platform.h openmp/runtime/src/kmp_platform
                KMP_ARCH_AARCH64 + KMP_ARCH_MIPS + KMP_ARCH_MIPS64 +             \
                KMP_ARCH_RISCV64 + KMP_ARCH_LOONGARCH64 + KMP_ARCH_VE +          \
                KMP_ARCH_S390X + KMP_ARCH_WASM + KMP_ARCH_PPC +                  \
-diff -ruN openmp.orig/runtime/src/kmp_runtime.cpp openmp/runtime/src/kmp_runtime.cpp
---- openmp.orig/runtime/src/kmp_runtime.cpp	2026-07-11 00:20:53.689664328 +0800
-+++ openmp/runtime/src/kmp_runtime.cpp	2026-07-11 00:01:00.220185681 +0800
+diff -ruN a/openmp/runtime/src/kmp_runtime.cpp b/openmp/runtime/src/kmp_runtime.cpp
+--- a/openmp/runtime/src/kmp_runtime.cpp	2026-06-16 06:33:53.000000000 +0800
++++ b/openmp/runtime/src/kmp_runtime.cpp	2026-07-11 09:00:53.135318130 +0800
 @@ -1113,7 +1113,7 @@
    KMP_MB();
  }
@@ -927,9 +959,9 @@ diff -ruN openmp.orig/runtime/src/kmp_runtime.cpp openmp/runtime/src/kmp_runtime
      KMP_ARCH_MIPS64 || KMP_ARCH_RISCV64 || KMP_ARCH_LOONGARCH64 ||             \
      KMP_ARCH_VE || KMP_ARCH_S390X || KMP_ARCH_WASM
  
-diff -ruN openmp.orig/runtime/src/kmp_settings.cpp openmp/runtime/src/kmp_settings.cpp
---- openmp.orig/runtime/src/kmp_settings.cpp	2026-07-11 00:20:53.690054765 +0800
-+++ openmp/runtime/src/kmp_settings.cpp	2026-07-10 19:07:04.699894981 +0800
+diff -ruN a/openmp/runtime/src/kmp_settings.cpp b/openmp/runtime/src/kmp_settings.cpp
+--- a/openmp/runtime/src/kmp_settings.cpp	2026-06-16 06:33:53.000000000 +0800
++++ b/openmp/runtime/src/kmp_settings.cpp	2026-07-11 09:00:53.135318130 +0800
 @@ -789,7 +789,7 @@
  // -----------------------------------------------------------------------------
  // KMP_INHERIT_FP_CONTROL
@@ -993,9 +1025,9 @@ diff -ruN openmp.orig/runtime/src/kmp_settings.cpp openmp/runtime/src/kmp_settin
      {"KMP_INHERIT_FP_CONTROL", __kmp_stg_parse_inherit_fp_control,
       __kmp_stg_print_inherit_fp_control, NULL, 0, 0},
  #endif /* KMP_ARCH_X86 || KMP_ARCH_X86_64 */
-diff -ruN openmp.orig/runtime/src/kmp_stats.cpp openmp/runtime/src/kmp_stats.cpp
---- openmp.orig/runtime/src/kmp_stats.cpp	2026-07-11 00:20:53.690244050 +0800
-+++ openmp/runtime/src/kmp_stats.cpp	2026-07-10 19:07:04.698145272 +0800
+diff -ruN a/openmp/runtime/src/kmp_stats.cpp b/openmp/runtime/src/kmp_stats.cpp
+--- a/openmp/runtime/src/kmp_stats.cpp	2026-06-16 06:33:53.000000000 +0800
++++ b/openmp/runtime/src/kmp_stats.cpp	2026-07-11 09:00:53.135318130 +0800
 @@ -774,7 +774,7 @@
    fprintf(statsOut, "# Time of run: %s\n", &buffer[0]);
    if (gethostname(&hostName[0], sizeof(hostName)) == 0)
@@ -1005,9 +1037,9 @@ diff -ruN openmp.orig/runtime/src/kmp_stats.cpp openmp/runtime/src/kmp_stats.cpp
    fprintf(statsOut, "# CPU:  %s\n", &__kmp_cpuinfo.name[0]);
    fprintf(statsOut, "# Family: %d, Model: %d, Stepping: %d\n",
            __kmp_cpuinfo.family, __kmp_cpuinfo.model, __kmp_cpuinfo.stepping);
-diff -ruN openmp.orig/runtime/src/kmp_stats_timing.cpp openmp/runtime/src/kmp_stats_timing.cpp
---- openmp.orig/runtime/src/kmp_stats_timing.cpp	2026-07-11 00:20:53.690356611 +0800
-+++ openmp/runtime/src/kmp_stats_timing.cpp	2026-07-11 00:01:08.640099357 +0800
+diff -ruN a/openmp/runtime/src/kmp_stats_timing.cpp b/openmp/runtime/src/kmp_stats_timing.cpp
+--- a/openmp/runtime/src/kmp_stats_timing.cpp	2026-06-16 06:33:53.000000000 +0800
++++ b/openmp/runtime/src/kmp_stats_timing.cpp	2026-07-11 09:00:53.135318130 +0800
 @@ -28,7 +28,7 @@
    // pretty bad assumption of 1GHz clock for MIC
    return 1 / ((double)1000 * 1.e6);
@@ -1017,9 +1049,9 @@ diff -ruN openmp.orig/runtime/src/kmp_stats_timing.cpp openmp/runtime/src/kmp_st
  #include <string.h>
  // Extract the value from the CPUID information
  double tsc_tick_count::tick_time() {
-diff -ruN openmp.orig/runtime/src/kmp_utility.cpp openmp/runtime/src/kmp_utility.cpp
---- openmp.orig/runtime/src/kmp_utility.cpp	2026-07-11 00:20:53.690907540 +0800
-+++ openmp/runtime/src/kmp_utility.cpp	2026-07-10 19:07:04.706262545 +0800
+diff -ruN a/openmp/runtime/src/kmp_utility.cpp b/openmp/runtime/src/kmp_utility.cpp
+--- a/openmp/runtime/src/kmp_utility.cpp	2026-06-16 06:33:53.000000000 +0800
++++ b/openmp/runtime/src/kmp_utility.cpp	2026-07-11 09:00:53.135318130 +0800
 @@ -18,7 +18,7 @@
  
  static const char *unknown = "unknown";
@@ -1029,9 +1061,9 @@ diff -ruN openmp.orig/runtime/src/kmp_utility.cpp openmp/runtime/src/kmp_utility
  
  /* NOTE: If called before serial_initialize (i.e. from runtime_initialize), then
     the debugging package has not been initialized yet, and only "0" will print
-diff -ruN openmp.orig/runtime/src/z_Linux_asm.S openmp/runtime/src/z_Linux_asm.S
---- openmp.orig/runtime/src/z_Linux_asm.S	2026-07-11 00:20:53.692358278 +0800
-+++ openmp/runtime/src/z_Linux_asm.S	2026-07-11 00:06:36.753535659 +0800
+diff -ruN a/openmp/runtime/src/z_Linux_asm.S b/openmp/runtime/src/z_Linux_asm.S
+--- a/openmp/runtime/src/z_Linux_asm.S	2026-06-16 06:33:53.000000000 +0800
++++ b/openmp/runtime/src/z_Linux_asm.S	2026-07-11 09:00:53.135318130 +0800
 @@ -17,7 +17,7 @@
  
  #include "kmp_config.h"
@@ -1087,9 +1119,9 @@ diff -ruN openmp.orig/runtime/src/z_Linux_asm.S openmp/runtime/src/z_Linux_asm.S
  
  // '
  #if KMP_ARCH_AARCH64 || KMP_ARCH_AARCH64_32
-diff -ruN openmp.orig/runtime/src/z_Linux_util.cpp openmp/runtime/src/z_Linux_util.cpp
---- openmp.orig/runtime/src/z_Linux_util.cpp	2026-07-11 00:20:53.692449733 +0800
-+++ openmp/runtime/src/z_Linux_util.cpp	2026-07-11 00:04:01.231701488 +0800
+diff -ruN a/openmp/runtime/src/z_Linux_util.cpp b/openmp/runtime/src/z_Linux_util.cpp
+--- a/openmp/runtime/src/z_Linux_util.cpp	2026-06-16 06:33:53.000000000 +0800
++++ b/openmp/runtime/src/z_Linux_util.cpp	2026-07-11 09:25:18.359089079 +0800
 @@ -321,7 +321,7 @@
  
  #endif // KMP_USE_FUTEX
@@ -1131,3 +1163,12 @@ diff -ruN openmp.orig/runtime/src/z_Linux_util.cpp openmp/runtime/src/z_Linux_ut
  /* Measure clock ticks per millisecond */
  void __kmp_initialize_system_tick() {
    kmp_uint64 now, nsec2, diff;
+@@ -2736,7 +2736,7 @@
+ 
+ #endif // USE_LOAD_BALANCE
+ 
+-#if !(KMP_ARCH_X86 || KMP_ARCH_X86_64 || KMP_MIC || KMP_ARCH_AARCH64 ||        \
++#if !(KMP_ARCH_X86 || KMP_ARCH_X86_64 || KMP_ARCH_X86_X32 || KMP_MIC || KMP_ARCH_AARCH64 ||        \
+       KMP_ARCH_PPC64 || KMP_ARCH_RISCV64 || KMP_ARCH_LOONGARCH64 ||            \
+       KMP_ARCH_ARM || KMP_ARCH_VE || KMP_ARCH_S390X || KMP_ARCH_PPC_XCOFF ||   \
+       KMP_ARCH_AARCH64_32)
