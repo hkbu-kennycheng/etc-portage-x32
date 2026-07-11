@@ -1,0 +1,23 @@
+--- a/configure.ac
++++ b/configure.ac
+@@ -2745,6 +2745,20 @@
+     AC_MSG_CHECKING(native coroutine implementation for ${target_cpu}-${target_os})
+     AC_MSG_RESULT(${coroutine_type})
+ ])
++# On the x32 (ILP32) ABI the amd64 coroutine assembly is unsafe: it stores the
++# 64-bit stack pointer with movq into a 4-byte (void*) C struct and expects
++# 8-byte stack slots, which corrupts the saved context and crashes
++# Fiber/continuation (e.g. "Bus Error at 0x00000000" during Fiber#resume).
++# Force the libc ucontext backend on x32, which is ABI-correct. Debian does
++# the same via --with-coroutine=ucontext on x32.
++AS_CASE([$target_cpu-$target_os],
++    [x*64-linux*], [
++        AS_IF([test "x$ac_cv_sizeof_voidp" = x4], [
++            AC_CHECK_FUNCS([getcontext swapcontext makecontext],
++                [coroutine_type=ucontext],
++                [])
++        ])
++    ])
+ COROUTINE_H=coroutine/$coroutine_type/Context.h
+ AS_IF([test ! -f "$srcdir/$COROUTINE_H"],
+       [AC_MSG_ERROR('$coroutine_type' is not supported as coroutine)])
